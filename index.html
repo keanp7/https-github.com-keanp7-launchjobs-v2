@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BibloTalk — Biblical Discussion Platform</title>
+  <meta name="description" content="Biblical discussions, organized and respectful. Study the Word. Share your thoughts. Grow spiritually." />
+  <meta name="theme-color" content="#1E3A8A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            royal:  '#1E3A8A',
+            gold:   '#D4AF37',
+            forest: '#16A34A',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Custom scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #1E3A8A; border-radius: 3px; }
+
+    /* ── Gradient text helper ── */
+    .gradient-text {
+      background: linear-gradient(135deg, #1E3A8A 0%, #D4AF37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Gold underline decoration ── */
+    .gold-underline {
+      position: relative;
+      display: inline-block;
+    }
+    .gold-underline::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 100%; height: 3px;
+      background: #D4AF37;
+      border-radius: 2px;
+    }
+
+    /* ── Language pill active ── */
+    .lang-btn.active {
+      background: #1E3A8A;
+      color: #ffffff;
+    }
+
+    /* ── Smooth fade for section content ── */
+    .fade-in {
+      animation: fadeIn 0.4s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Sticky nav shadow on scroll ── */
+    #navbar.scrolled {
+      box-shadow: 0 2px 20px rgba(30,58,138,.12);
+    }
+
+    /* ── Card hover lift ── */
+    .card-lift {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(30,58,138,.12);
+    }
+
+    /* ── Mobile menu ── */
+    #mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    #mobile-menu.open {
+      max-height: 400px;
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-white text-gray-800 antialiased">
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md transition-shadow duration-300">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2">
+        <span class="text-2xl font-bold text-royal tracking-tight">
+          Biblo<span class="text-gold">Talk</span>
+        </span>
+      </a>
+
+      <!-- Desktop nav links -->
+      <div class="hidden md:flex items-center gap-6">
+        <a href="#" data-i18n="navHome"   class="text-sm font-medium text-gray-600 hover:text-royal transition-colors">Home</a>
+        <a href="#features" data-i18n="navGroups"  class="text-sm font-medium text-gray-600 hover:text-royal transition-colors">Groups</a>
+        <a href="#howitworks" data-i18n="navDebates" class="text-sm font-medium text-gray-600 hover:text-royal transition-colors">Debates</a>
+        <a href="#cta" data-i18n="navLogin"   class="text-sm font-medium text-gray-600 hover:text-royal transition-colors">Login</a>
+      </div>
+
+      <!-- Right: lang switcher + CTA -->
+      <div class="hidden md:flex items-center gap-3">
+        <!-- Language switcher -->
+        <div class="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1">
+          <button onclick="setLang('ht')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="ht">HT</button>
+          <button onclick="setLang('fr')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="fr">FR</button>
+          <button onclick="setLang('es')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="es">ES</button>
+          <button onclick="setLang('en')" class="lang-btn active text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="en">EN</button>
+        </div>
+        <a href="#cta" data-i18n="navJoin" class="bg-royal text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-blue-900 transition-colors shadow-sm">Join Now</a>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button id="hamburger" class="md:hidden flex flex-col gap-1.5 p-2" onclick="toggleMobile()">
+        <span class="block w-5 h-0.5 bg-gray-700 transition-all" id="hb1"></span>
+        <span class="block w-5 h-0.5 bg-gray-700 transition-all" id="hb2"></span>
+        <span class="block w-5 h-0.5 bg-gray-700 transition-all" id="hb3"></span>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden border-t border-gray-100">
+      <div class="py-4 flex flex-col gap-3">
+        <a href="#" data-i18n="navHome"    class="text-sm font-medium text-gray-700 hover:text-royal px-2">Home</a>
+        <a href="#features" data-i18n="navGroups"   class="text-sm font-medium text-gray-700 hover:text-royal px-2" onclick="toggleMobile()">Groups</a>
+        <a href="#howitworks" data-i18n="navDebates"  class="text-sm font-medium text-gray-700 hover:text-royal px-2" onclick="toggleMobile()">Debates</a>
+        <a href="#cta" data-i18n="navLogin"    class="text-sm font-medium text-gray-700 hover:text-royal px-2" onclick="toggleMobile()">Login</a>
+        <!-- Mobile lang + CTA -->
+        <div class="flex items-center gap-2 px-2 pt-2 border-t border-gray-100">
+          <div class="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1">
+            <button onclick="setLang('ht')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="ht">HT</button>
+            <button onclick="setLang('fr')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="fr">FR</button>
+            <button onclick="setLang('es')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="es">ES</button>
+            <button onclick="setLang('en')" class="lang-btn active text-xs font-semibold px-2 py-0.5 rounded-full transition-colors" data-lang="en">EN</button>
+          </div>
+          <a href="#cta" data-i18n="navJoin" class="flex-1 text-center bg-royal text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-blue-900 transition-colors" onclick="toggleMobile()">Join Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section id="hero" class="pt-24 pb-20 bg-gradient-to-br from-white via-blue-50 to-white overflow-hidden">
+  <!-- Decorative blobs -->
+  <div class="absolute top-20 right-0 w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-40 pointer-events-none -z-10"></div>
+  <div class="absolute top-40 left-0 w-48 h-48 bg-yellow-100 rounded-full blur-3xl opacity-50 pointer-events-none -z-10"></div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-royal text-xs font-semibold px-4 py-1.5 rounded-full mb-6">
+      <span class="w-2 h-2 rounded-full bg-forest animate-pulse"></span>
+      <span data-i18n="heroBadge">Biblical Community Platform</span>
+    </div>
+
+    <!-- Headline -->
+    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-6">
+      <span data-i18n="heroTitle1">Biblical discussions,</span><br />
+      <span class="gradient-text" data-i18n="heroTitle2">organized and respectful</span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed" data-i18n="heroSubtitle">
+      Study the Word. Share your thoughts. Grow spiritually.
+    </p>
+
+    <!-- CTAs -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+      <a href="#cta" data-i18n="heroCta"
+         class="w-full sm:w-auto bg-royal text-white font-bold px-8 py-3.5 rounded-full hover:bg-blue-900 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 text-base">
+        Start Now
+      </a>
+      <a href="#howitworks" data-i18n="heroCtaSecondary"
+         class="w-full sm:w-auto border-2 border-royal text-royal font-bold px-8 py-3.5 rounded-full hover:bg-blue-50 transition-all text-base">
+        Explore Debates
+      </a>
+    </div>
+
+    <!-- Trust line -->
+    <p class="mt-8 text-xs text-gray-400 font-medium tracking-wide" data-i18n="heroTrust">
+      Free to join &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; Built for believers
+    </p>
+  </div>
+
+  <!-- Floating verse card -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 mt-16">
+    <div class="relative mx-auto max-w-xl bg-white rounded-2xl shadow-xl border border-gray-100 p-6 overflow-hidden">
+      <div class="absolute top-0 left-0 w-1.5 h-full bg-gold rounded-l-2xl"></div>
+      <div class="pl-3">
+        <span class="text-xs font-bold text-gold uppercase tracking-widest" data-i18n="heroVerseBadge">Verse of the Day</span>
+        <blockquote class="mt-2 text-gray-800 font-medium italic text-sm sm:text-base" data-i18n="heroVerse">
+          "Your word is a lamp to my feet and a light to my path."
+        </blockquote>
+        <cite class="block mt-2 text-xs text-gray-400 not-italic" data-i18n="heroVerseRef">— Psalm 119:105</cite>
+      </div>
+      <div class="absolute bottom-4 right-5 flex gap-1">
+        <span class="w-2 h-2 rounded-full bg-royal opacity-30"></span>
+        <span class="w-2 h-2 rounded-full bg-gold opacity-40"></span>
+        <span class="w-2 h-2 rounded-full bg-forest opacity-30"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PROBLEM
+═══════════════════════════════════════════ -->
+<section id="problem" class="py-20 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-12">
+      <span class="text-xs font-bold uppercase tracking-widest text-gold" data-i18n="problemLabel">The Challenge</span>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900" data-i18n="problemTitle">
+        Why Biblical discussions get messy
+      </h2>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-6">
+      <!-- Problem 1 -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-gray-100">
+        <div class="w-12 h-12 flex items-center justify-center bg-red-50 rounded-xl mb-4 text-2xl">🌀</div>
+        <h3 class="font-bold text-gray-900 mb-2" data-i18n="prob1Title">Disorganized Discussions</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="prob1Desc">
+          Comments pile up without structure, making it impossible to follow threads or find specific insights.
+        </p>
+      </div>
+
+      <!-- Problem 2 -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-gray-100">
+        <div class="w-12 h-12 flex items-center justify-center bg-orange-50 rounded-xl mb-4 text-2xl">🔀</div>
+        <h3 class="font-bold text-gray-900 mb-2" data-i18n="prob2Title">Hard to Follow Conversations</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="prob2Desc">
+          Topics drift and replies lose context, leaving readers confused and discussions fragmented.
+        </p>
+      </div>
+
+      <!-- Problem 3 -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-gray-100">
+        <div class="w-12 h-12 flex items-center justify-center bg-rose-50 rounded-xl mb-4 text-2xl">⚡</div>
+        <h3 class="font-bold text-gray-900 mb-2" data-i18n="prob3Title">Conflicts Without Structure</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="prob3Desc">
+          Without clear rules and moderation, conversations turn into arguments instead of growth.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     SOLUTION
+═══════════════════════════════════════════ -->
+<section id="solution" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <!-- Split layout -->
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <!-- Left: text -->
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-forest" data-i18n="solutionLabel">The Solution</span>
+        <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4" data-i18n="solutionTitle">
+          BibloTalk brings order to the Word
+        </h2>
+        <p class="text-gray-500 mb-8 leading-relaxed" data-i18n="solutionDesc">
+          Every discussion is anchored to a Bible verse. Every comment has a place. Every community has agreed values.
+        </p>
+
+        <div class="space-y-5">
+          <!-- Sol 1 -->
+          <div class="flex gap-4 items-start">
+            <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-royal rounded-xl text-white font-bold text-sm">1</div>
+            <div>
+              <h4 class="font-bold text-gray-900" data-i18n="sol1Title">Structured Debates by Bible Verse</h4>
+              <p class="text-sm text-gray-500 mt-1" data-i18n="sol1Desc">Every debate starts with a specific scripture — keeping all discussion grounded and relevant.</p>
+            </div>
+          </div>
+          <!-- Sol 2 -->
+          <div class="flex gap-4 items-start">
+            <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gold rounded-xl text-white font-bold text-sm">2</div>
+            <div>
+              <h4 class="font-bold text-gray-900" data-i18n="sol2Title">Organized Comments</h4>
+              <p class="text-sm text-gray-500 mt-1" data-i18n="sol2Desc">Threaded replies and upvoting surface the best insights without noise.</p>
+            </div>
+          </div>
+          <!-- Sol 3 -->
+          <div class="flex gap-4 items-start">
+            <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-forest rounded-xl text-white font-bold text-sm">3</div>
+            <div>
+              <h4 class="font-bold text-gray-900" data-i18n="sol3Title">Respectful Community</h4>
+              <p class="text-sm text-gray-500 mt-1" data-i18n="sol3Desc">Community guidelines and reporting tools keep conversations enriching, not toxic.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: visual mockup -->
+      <div class="relative">
+        <div class="bg-gradient-to-br from-blue-50 to-white rounded-3xl p-6 border border-blue-100 shadow-sm">
+          <!-- Verse anchor -->
+          <div class="bg-royal text-white rounded-xl px-4 py-3 mb-4">
+            <span class="text-xs text-blue-200 font-semibold uppercase tracking-widest" data-i18n="mockVerseBadge">Discussion Anchor</span>
+            <p class="font-bold mt-1 text-sm" data-i18n="mockVerse">"For I know the plans I have for you..." — Jer 29:11</p>
+          </div>
+          <!-- Comment thread -->
+          <div class="space-y-3">
+            <div class="bg-white rounded-xl px-4 py-3 border border-gray-100 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-6 h-6 rounded-full bg-royal text-white text-xs flex items-center justify-center font-bold">M</div>
+                <span class="text-xs font-semibold text-gray-700">Marie</span>
+                <span class="ml-auto text-xs text-gray-400">2m</span>
+              </div>
+              <p class="text-xs text-gray-600" data-i18n="mockComment1">This verse gives me strength every morning!</p>
+            </div>
+            <div class="bg-white rounded-xl px-4 py-3 border border-gray-100 shadow-sm ml-6">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">J</div>
+                <span class="text-xs font-semibold text-gray-700">Jean</span>
+                <span class="ml-auto text-xs text-gray-400">1m</span>
+              </div>
+              <p class="text-xs text-gray-600" data-i18n="mockComment2">In Haitian context, this speaks to collective hope.</p>
+            </div>
+            <div class="bg-white rounded-xl px-4 py-3 border border-gray-100 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-6 h-6 rounded-full bg-gold text-white text-xs flex items-center justify-center font-bold">S</div>
+                <span class="text-xs font-semibold text-gray-700">Sophie</span>
+                <span class="ml-auto text-xs text-gray-400">just now</span>
+              </div>
+              <p class="text-xs text-gray-600" data-i18n="mockComment3">Compare with Romans 8:28 — same divine promise!</p>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badge -->
+        <div class="absolute -top-3 -right-3 bg-forest text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md" data-i18n="mockBadge">
+          Respectful ✓
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════ -->
+<section id="howitworks" class="py-20 bg-gradient-to-b from-gray-50 to-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-14">
+      <span class="text-xs font-bold uppercase tracking-widest text-royal" data-i18n="howLabel">Simple Process</span>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900" data-i18n="howTitle">How It Works</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto" data-i18n="howSubtitle">Three simple steps to meaningful Biblical conversations</p>
+    </div>
+
+    <!-- Steps -->
+    <div class="relative">
+      <!-- Connector line (desktop) -->
+      <div class="hidden md:block absolute top-10 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-royal via-gold to-forest opacity-20"></div>
+
+      <div class="grid sm:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="text-center card-lift bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+          <div class="w-16 h-16 mx-auto flex items-center justify-center rounded-2xl bg-royal mb-5 shadow-lg shadow-blue-100">
+            <span class="text-2xl">🤝</span>
+          </div>
+          <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-royal text-white text-xs font-bold mb-3">1</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-2" data-i18n="step1Title">Join a Group</h3>
+          <p class="text-sm text-gray-500 leading-relaxed" data-i18n="step1Desc">
+            Browse existing groups or create your own around a theme, denomination, or language.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="text-center card-lift bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+          <div class="w-16 h-16 mx-auto flex items-center justify-center rounded-2xl bg-gold mb-5 shadow-lg shadow-yellow-100">
+            <span class="text-2xl">📖</span>
+          </div>
+          <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gold text-white text-xs font-bold mb-3">2</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-2" data-i18n="step2Title">Pick a Verse</h3>
+          <p class="text-sm text-gray-500 leading-relaxed" data-i18n="step2Desc">
+            Choose any Bible verse as the foundation of your debate — search by book, chapter, or keyword.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="text-center card-lift bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+          <div class="w-16 h-16 mx-auto flex items-center justify-center rounded-2xl bg-forest mb-5 shadow-lg shadow-green-100">
+            <span class="text-2xl">💬</span>
+          </div>
+          <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-xs font-bold mb-3">3</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-2" data-i18n="step3Title">Join the Discussion</h3>
+          <p class="text-sm text-gray-500 leading-relaxed" data-i18n="step3Desc">
+            Share your interpretation, respond to others respectfully, and grow together in the Word.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FEATURES
+═══════════════════════════════════════════ -->
+<section id="features" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-14">
+      <span class="text-xs font-bold uppercase tracking-widest text-gold" data-i18n="featLabel">What You Get</span>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900" data-i18n="featTitle">Everything you need for deep study</h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Feature 1 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white border border-blue-100">
+        <div class="text-3xl mb-4">👥</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat1Title">Groups</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat1Desc">
+          Public and private groups for churches, Bible study circles, and personal communities.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-1">
+          <span class="text-xs bg-blue-100 text-royal font-medium px-2 py-0.5 rounded-full" data-i18n="feat1Tag1">Public</span>
+          <span class="text-xs bg-blue-100 text-royal font-medium px-2 py-0.5 rounded-full" data-i18n="feat1Tag2">Private</span>
+          <span class="text-xs bg-blue-100 text-royal font-medium px-2 py-0.5 rounded-full" data-i18n="feat1Tag3">Multilingual</span>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-yellow-50 to-white border border-yellow-100">
+        <div class="text-3xl mb-4">⚖️</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat2Title">Verse-Based Debates</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat2Desc">
+          Every debate is anchored to scripture — no off-topic drift, no confusion about what's being discussed.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-1">
+          <span class="text-xs bg-yellow-100 text-yellow-800 font-medium px-2 py-0.5 rounded-full" data-i18n="feat2Tag1">Structured</span>
+          <span class="text-xs bg-yellow-100 text-yellow-800 font-medium px-2 py-0.5 rounded-full" data-i18n="feat2Tag2">Scripture-first</span>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-green-50 to-white border border-green-100">
+        <div class="text-3xl mb-4">📝</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat3Title">Comments & Threads</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat3Desc">
+          Nested replies keep conversations easy to follow. React with scriptures, not just emojis.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-1">
+          <span class="text-xs bg-green-100 text-green-800 font-medium px-2 py-0.5 rounded-full" data-i18n="feat3Tag1">Threaded</span>
+          <span class="text-xs bg-green-100 text-green-800 font-medium px-2 py-0.5 rounded-full" data-i18n="feat3Tag2">Verse reactions</span>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-purple-50 to-white border border-purple-100">
+        <div class="text-3xl mb-4">🌍</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat4Title">Multilingual</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat4Desc">
+          Participate in your language. Haitian Creole, French, Spanish, and English — all welcome.
+        </p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100">
+        <div class="text-3xl mb-4">📱</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat5Title">Mobile App (PWA)</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat5Desc">
+          Install directly on your phone — no app store needed. Works offline for reading past discussions.
+        </p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="card-lift rounded-2xl p-6 bg-gradient-to-br from-rose-50 to-white border border-rose-100">
+        <div class="text-3xl mb-4">🛡️</div>
+        <h4 class="font-bold text-gray-900 mb-2" data-i18n="feat6Title">Moderation Tools</h4>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="feat6Desc">
+          Group admins have full control — approve members, pin discussions, and remove harmful content.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     COMMUNITY RULES
+═══════════════════════════════════════════ -->
+<section id="rules" class="py-20 bg-gradient-to-br from-royal to-blue-900 text-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-14">
+      <span class="text-xs font-bold uppercase tracking-widest text-gold" data-i18n="rulesLabel">Our Standards</span>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="rulesTitle">Community Rules</h2>
+      <p class="mt-3 text-blue-200 max-w-xl mx-auto text-sm" data-i18n="rulesSubtitle">
+        A place to grow in faith, not to fight. These are the values we hold together.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Rule 1 -->
+      <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center card-lift">
+        <div class="text-4xl mb-4">🕊️</div>
+        <h4 class="font-bold text-lg mb-2" data-i18n="rule1Title">Respect</h4>
+        <p class="text-sm text-blue-200 leading-relaxed" data-i18n="rule1Desc">
+          Treat every person with the dignity they deserve as a fellow believer and human being.
+        </p>
+      </div>
+
+      <!-- Rule 2 -->
+      <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center card-lift">
+        <div class="text-4xl mb-4">🚫</div>
+        <h4 class="font-bold text-lg mb-2" data-i18n="rule2Title">No Insults</h4>
+        <p class="text-sm text-blue-200 leading-relaxed" data-i18n="rule2Desc">
+          Challenge ideas, never the person. Personal attacks, slurs, and mockery are not permitted.
+        </p>
+      </div>
+
+      <!-- Rule 3 -->
+      <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center card-lift">
+        <div class="text-4xl mb-4">📜</div>
+        <h4 class="font-bold text-lg mb-2" data-i18n="rule3Title">Use Bible Verses</h4>
+        <p class="text-sm text-blue-200 leading-relaxed" data-i18n="rule3Desc">
+          Back your arguments with scripture. Opinion is welcome; the Word is the anchor.
+        </p>
+      </div>
+
+      <!-- Rule 4 -->
+      <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center card-lift">
+        <div class="text-4xl mb-4">🌱</div>
+        <h4 class="font-bold text-lg mb-2" data-i18n="rule4Title">Learn, Not Attack</h4>
+        <p class="text-sm text-blue-200 leading-relaxed" data-i18n="rule4Desc">
+          Come with an open heart. The goal is spiritual growth for everyone in the conversation.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     CTA SECTION
+═══════════════════════════════════════════ -->
+<section id="cta" class="py-24 bg-white">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+    <!-- Gold accent bar -->
+    <div class="w-12 h-1 bg-gold rounded-full mx-auto mb-6"></div>
+
+    <h2 class="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+      <span data-i18n="ctaTitle1">Join the first group:</span><br />
+      <span class="gradient-text" data-i18n="ctaGroupName">Aide aux Ames</span>
+    </h2>
+
+    <p class="text-gray-500 text-lg mb-4 leading-relaxed" data-i18n="ctaDesc">
+      A warm, multilingual space dedicated to helping souls find comfort, guidance, and hope through the Word.
+    </p>
+
+    <!-- Group info card -->
+    <div class="inline-flex items-center gap-4 bg-blue-50 border border-blue-100 rounded-2xl px-6 py-4 mb-8">
+      <div class="w-12 h-12 rounded-xl bg-royal flex items-center justify-center text-xl">✝️</div>
+      <div class="text-left">
+        <div class="font-bold text-gray-900" data-i18n="ctaGroupName2">Aide aux Ames</div>
+        <div class="text-xs text-gray-500 mt-0.5" data-i18n="ctaGroupMembers">Open group · HT, FR, EN, ES</div>
+      </div>
+      <div class="ml-2 w-2.5 h-2.5 rounded-full bg-forest animate-pulse"></div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="#" data-i18n="ctaBtn"
+         class="bg-royal text-white font-bold px-10 py-4 rounded-full hover:bg-blue-900 transition-all shadow-xl shadow-blue-100 hover:shadow-blue-200 text-base">
+        Join Now — It's Free
+      </a>
+      <a href="#features" data-i18n="ctaBtnSecondary"
+         class="border-2 border-gray-200 text-gray-700 font-bold px-10 py-4 rounded-full hover:border-royal hover:text-royal transition-all text-base">
+        Learn More
+      </a>
+    </div>
+
+    <p class="mt-6 text-xs text-gray-400" data-i18n="ctaFine">No spam. Unsubscribe at any time. Your faith journey is yours.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="bg-gray-900 text-gray-400">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+    <div class="grid sm:grid-cols-4 gap-8 mb-10">
+      <!-- Brand -->
+      <div class="sm:col-span-2">
+        <a href="#" class="text-2xl font-bold text-white tracking-tight">
+          Biblo<span class="text-gold">Talk</span>
+        </a>
+        <p class="mt-3 text-sm leading-relaxed max-w-xs" data-i18n="footerTagline">
+          Biblical discussions, organized and respectful. Grow together in the Word.
+        </p>
+        <!-- Social / lang -->
+        <div class="mt-5 flex items-center gap-2">
+          <div class="flex items-center gap-1 bg-gray-800 rounded-full px-2 py-1">
+            <button onclick="setLang('ht')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors text-gray-300" data-lang="ht">HT</button>
+            <button onclick="setLang('fr')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors text-gray-300" data-lang="fr">FR</button>
+            <button onclick="setLang('es')" class="lang-btn text-xs font-semibold px-2 py-0.5 rounded-full transition-colors text-gray-300" data-lang="es">ES</button>
+            <button onclick="setLang('en')" class="lang-btn active text-xs font-semibold px-2 py-0.5 rounded-full transition-colors text-gray-300" data-lang="en">EN</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links 1 -->
+      <div>
+        <h5 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4" data-i18n="footerPlatform">Platform</h5>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition-colors" data-i18n="navHome">Home</a></li>
+          <li><a href="#features" class="hover:text-white transition-colors" data-i18n="navGroups">Groups</a></li>
+          <li><a href="#howitworks" class="hover:text-white transition-colors" data-i18n="navDebates">Debates</a></li>
+          <li><a href="#rules" class="hover:text-white transition-colors" data-i18n="rulesTitle">Community Rules</a></li>
+        </ul>
+      </div>
+
+      <!-- Links 2 -->
+      <div>
+        <h5 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4" data-i18n="footerCompany">Company</h5>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition-colors" data-i18n="footerAbout">About</a></li>
+          <li><a href="#" class="hover:text-white transition-colors" data-i18n="footerPrivacy">Privacy</a></li>
+          <li><a href="#" class="hover:text-white transition-colors" data-i18n="footerTerms">Terms</a></li>
+          <li><a href="#" class="hover:text-white transition-colors" data-i18n="footerContact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-xs" data-i18n="footerCopyright">© 2026 BibloTalk. All rights reserved.</p>
+      <p class="text-xs flex items-center gap-1">
+        <span data-i18n="footerMadeWith">Made with</span>
+        <span class="text-gold">♥</span>
+        <span data-i18n="footerMadeFor">for the global Christian community</span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+// ── TRANSLATIONS ──────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    // Navbar
+    navHome:    'Home',
+    navGroups:  'Groups',
+    navDebates: 'Debates',
+    navLogin:   'Login',
+    navJoin:    'Join Now',
+
+    // Hero
+    heroBadge:         'Biblical Community Platform',
+    heroTitle1:        'Biblical discussions,',
+    heroTitle2:        'organized and respectful',
+    heroSubtitle:      'Study the Word. Share your thoughts. Grow spiritually.',
+    heroCta:           'Start Now',
+    heroCtaSecondary:  'Explore Debates',
+    heroTrust:         'Free to join · No credit card · Built for believers',
+    heroVerseBadge:    'Verse of the Day',
+    heroVerse:         '"Your word is a lamp to my feet and a light to my path."',
+    heroVerseRef:      '— Psalm 119:105',
+
+    // Problem
+    problemLabel: 'The Challenge',
+    problemTitle: 'Why Biblical discussions get messy',
+    prob1Title:   'Disorganized Discussions',
+    prob1Desc:    'Comments pile up without structure, making it impossible to follow threads or find specific insights.',
+    prob2Title:   'Hard to Follow Conversations',
+    prob2Desc:    'Topics drift and replies lose context, leaving readers confused and discussions fragmented.',
+    prob3Title:   'Conflicts Without Structure',
+    prob3Desc:    'Without clear rules and moderation, conversations turn into arguments instead of growth.',
+
+    // Solution
+    solutionLabel: 'The Solution',
+    solutionTitle: 'BibloTalk brings order to the Word',
+    solutionDesc:  'Every discussion is anchored to a Bible verse. Every comment has a place. Every community has agreed values.',
+    sol1Title: 'Structured Debates by Bible Verse',
+    sol1Desc:  'Every debate starts with a specific scripture — keeping all discussion grounded and relevant.',
+    sol2Title: 'Organized Comments',
+    sol2Desc:  'Threaded replies and upvoting surface the best insights without noise.',
+    sol3Title: 'Respectful Community',
+    sol3Desc:  'Community guidelines and reporting tools keep conversations enriching, not toxic.',
+    mockVerseBadge: 'Discussion Anchor',
+    mockVerse:      '"For I know the plans I have for you..." — Jer 29:11',
+    mockComment1:   'This verse gives me strength every morning!',
+    mockComment2:   'In Haitian context, this speaks to collective hope.',
+    mockComment3:   'Compare with Romans 8:28 — same divine promise!',
+    mockBadge:      'Respectful ✓',
+
+    // How It Works
+    howLabel:    'Simple Process',
+    howTitle:    'How It Works',
+    howSubtitle: 'Three simple steps to meaningful Biblical conversations',
+    step1Title: 'Join a Group',
+    step1Desc:  'Browse existing groups or create your own around a theme, denomination, or language.',
+    step2Title: 'Pick a Verse',
+    step2Desc:  'Choose any Bible verse as the foundation of your debate — search by book, chapter, or keyword.',
+    step3Title: 'Join the Discussion',
+    step3Desc:  'Share your interpretation, respond to others respectfully, and grow together in the Word.',
+
+    // Features
+    featLabel: 'What You Get',
+    featTitle: 'Everything you need for deep study',
+    feat1Title: 'Groups',
+    feat1Desc:  'Public and private groups for churches, Bible study circles, and personal communities.',
+    feat1Tag1: 'Public', feat1Tag2: 'Private', feat1Tag3: 'Multilingual',
+    feat2Title: 'Verse-Based Debates',
+    feat2Desc:  'Every debate is anchored to scripture — no off-topic drift, no confusion about what\'s being discussed.',
+    feat2Tag1: 'Structured', feat2Tag2: 'Scripture-first',
+    feat3Title: 'Comments & Threads',
+    feat3Desc:  'Nested replies keep conversations easy to follow. React with scriptures, not just emojis.',
+    feat3Tag1: 'Threaded', feat3Tag2: 'Verse reactions',
+    feat4Title: 'Multilingual',
+    feat4Desc:  'Participate in your language. Haitian Creole, French, Spanish, and English — all welcome.',
+    feat5Title: 'Mobile App (PWA)',
+    feat5Desc:  'Install directly on your phone — no app store needed. Works offline for reading past discussions.',
+    feat6Title: 'Moderation Tools',
+    feat6Desc:  'Group admins have full control — approve members, pin discussions, and remove harmful content.',
+
+    // Rules
+    rulesLabel:    'Our Standards',
+    rulesTitle:    'Community Rules',
+    rulesSubtitle: 'A place to grow in faith, not to fight. These are the values we hold together.',
+    rule1Title: 'Respect',
+    rule1Desc:  'Treat every person with the dignity they deserve as a fellow believer and human being.',
+    rule2Title: 'No Insults',
+    rule2Desc:  'Challenge ideas, never the person. Personal attacks, slurs, and mockery are not permitted.',
+    rule3Title: 'Use Bible Verses',
+    rule3Desc:  'Back your arguments with scripture. Opinion is welcome; the Word is the anchor.',
+    rule4Title: 'Learn, Not Attack',
+    rule4Desc:  'Come with an open heart. The goal is spiritual growth for everyone in the conversation.',
+
+    // CTA
+    ctaTitle1:        'Join the first group:',
+    ctaGroupName:     'Aide aux Ames',
+    ctaGroupName2:    'Aide aux Ames',
+    ctaDesc:          'A warm, multilingual space dedicated to helping souls find comfort, guidance, and hope through the Word.',
+    ctaGroupMembers:  'Open group · HT, FR, EN, ES',
+    ctaBtn:           'Join Now — It\'s Free',
+    ctaBtnSecondary:  'Learn More',
+    ctaFine:          'No spam. Unsubscribe at any time. Your faith journey is yours.',
+
+    // Footer
+    footerTagline:   'Biblical discussions, organized and respectful. Grow together in the Word.',
+    footerPlatform:  'Platform',
+    footerCompany:   'Company',
+    footerAbout:     'About',
+    footerPrivacy:   'Privacy',
+    footerTerms:     'Terms',
+    footerContact:   'Contact',
+    footerCopyright: '© 2026 BibloTalk. All rights reserved.',
+    footerMadeWith:  'Made with',
+    footerMadeFor:   'for the global Christian community',
+  },
+
+  // ── FRENCH ────────────────────────────────────────────────────────────────
+  fr: {
+    navHome:    'Accueil',
+    navGroups:  'Groupes',
+    navDebates: 'Débats',
+    navLogin:   'Connexion',
+    navJoin:    'Rejoindre',
+
+    heroBadge:         'Plateforme de Communauté Biblique',
+    heroTitle1:        'Des discussions bibliques,',
+    heroTitle2:        'organisées et respectueuses',
+    heroSubtitle:      'Étudiez la Parole. Partagez vos pensées. Grandissez spirituellement.',
+    heroCta:           'Commencer',
+    heroCtaSecondary:  'Explorer les Débats',
+    heroTrust:         'Gratuit · Sans carte bancaire · Pour les croyants',
+    heroVerseBadge:    'Verset du Jour',
+    heroVerse:         '« Ta parole est une lampe à mes pieds et une lumière sur mon sentier. »',
+    heroVerseRef:      '— Psaume 119:105',
+
+    problemLabel: 'Le Défi',
+    problemTitle: 'Pourquoi les discussions bibliques deviennent chaotiques',
+    prob1Title:   'Discussions Désorganisées',
+    prob1Desc:    'Les commentaires s\'accumulent sans structure, rendant impossible de suivre les fils ou de trouver des idées précises.',
+    prob2Title:   'Conversations Difficiles à Suivre',
+    prob2Desc:    'Les sujets dérivent et les réponses perdent leur contexte, laissant les lecteurs confus.',
+    prob3Title:   'Conflits Sans Structure',
+    prob3Desc:    'Sans règles claires, les échanges deviennent des querelles au lieu d\'être des occasions de croissance.',
+
+    solutionLabel: 'La Solution',
+    solutionTitle: 'BibloTalk remet de l\'ordre dans la Parole',
+    solutionDesc:  'Chaque discussion est ancrée dans un verset biblique. Chaque commentaire a sa place. Chaque communauté partage des valeurs communes.',
+    sol1Title: 'Débats Structurés par Verset',
+    sol1Desc:  'Chaque débat commence par une Écriture précise — gardant la discussion ciblée et pertinente.',
+    sol2Title: 'Commentaires Organisés',
+    sol2Desc:  'Les réponses imbriquées et les votes font ressortir les meilleures idées sans bruit.',
+    sol3Title: 'Communauté Respectueuse',
+    sol3Desc:  'Les règles communautaires et les outils de signalement maintiennent les échanges enrichissants.',
+    mockVerseBadge: 'Ancre de Discussion',
+    mockVerse:      '« Car je connais les projets que j\'ai formés sur vous… » — Jér 29:11',
+    mockComment1:   'Ce verset me donne de la force chaque matin !',
+    mockComment2:   'Dans le contexte haïtien, cela parle d\'espoir collectif.',
+    mockComment3:   'À comparer avec Romains 8:28 — même promesse divine !',
+    mockBadge:      'Respectueux ✓',
+
+    howLabel:    'Processus Simple',
+    howTitle:    'Comment ça Marche',
+    howSubtitle: 'Trois étapes simples pour des conversations bibliques enrichissantes',
+    step1Title: 'Rejoindre un Groupe',
+    step1Desc:  'Parcourez les groupes existants ou créez le vôtre autour d\'un thème, d\'une dénomination ou d\'une langue.',
+    step2Title: 'Choisir un Verset',
+    step2Desc:  'Sélectionnez un verset biblique comme fondement de votre débat — recherchez par livre, chapitre ou mot-clé.',
+    step3Title: 'Participer à la Discussion',
+    step3Desc:  'Partagez votre interprétation, répondez respectueusement et grandissez ensemble dans la Parole.',
+
+    featLabel: 'Ce Que Vous Obtenez',
+    featTitle: 'Tout ce qu\'il vous faut pour une étude approfondie',
+    feat1Title: 'Groupes',
+    feat1Desc:  'Groupes publics et privés pour les églises, les cercles d\'étude biblique et les communautés personnelles.',
+    feat1Tag1: 'Public', feat1Tag2: 'Privé', feat1Tag3: 'Multilingue',
+    feat2Title: 'Débats par Verset',
+    feat2Desc:  'Chaque débat est ancré dans les Écritures — pas de dérive hors sujet.',
+    feat2Tag1: 'Structuré', feat2Tag2: 'Scripture d\'abord',
+    feat3Title: 'Commentaires & Fils',
+    feat3Desc:  'Les réponses imbriquées facilitent le suivi des conversations. Réagissez avec des versets, pas seulement des emojis.',
+    feat3Tag1: 'Imbriqués', feat3Tag2: 'Réactions bibliques',
+    feat4Title: 'Multilingue',
+    feat4Desc:  'Participez dans votre langue. Créole haïtien, français, espagnol et anglais — tous bienvenus.',
+    feat5Title: 'Application Mobile (PWA)',
+    feat5Desc:  'Installez directement sur votre téléphone — pas de boutique d\'apps requise.',
+    feat6Title: 'Outils de Modération',
+    feat6Desc:  'Les administrateurs de groupe ont le contrôle total — approuvez les membres, épinglez des discussions.',
+
+    rulesLabel:    'Nos Standards',
+    rulesTitle:    'Règles de la Communauté',
+    rulesSubtitle: 'Un endroit pour grandir dans la foi, non pour se battre. Ce sont les valeurs que nous partageons.',
+    rule1Title: 'Respect',
+    rule1Desc:  'Traitez chaque personne avec la dignité qu\'elle mérite en tant que croyant et être humain.',
+    rule2Title: 'Aucune Insulte',
+    rule2Desc:  'Contestez les idées, jamais la personne. Les attaques personnelles et les moqueries ne sont pas permises.',
+    rule3Title: 'Utilisez des Versets',
+    rule3Desc:  'Appuyez vos arguments sur les Écritures. L\'opinion est la bienvenue ; la Parole est l\'ancre.',
+    rule4Title: 'Apprendre, Non Attaquer',
+    rule4Desc:  'Venez avec un cœur ouvert. Le but est la croissance spirituelle de chacun dans la conversation.',
+
+    ctaTitle1:        'Rejoignez le premier groupe :',
+    ctaGroupName:     'Aide aux Âmes',
+    ctaGroupName2:    'Aide aux Âmes',
+    ctaDesc:          'Un espace chaleureux et multilingue dédié à aider les âmes à trouver réconfort, guidance et espoir à travers la Parole.',
+    ctaGroupMembers:  'Groupe ouvert · HT, FR, EN, ES',
+    ctaBtn:           'Rejoindre — C\'est Gratuit',
+    ctaBtnSecondary:  'En Savoir Plus',
+    ctaFine:          'Aucun spam. Désinscription possible à tout moment.',
+
+    footerTagline:   'Des discussions bibliques organisées et respectueuses. Grandissez ensemble dans la Parole.',
+    footerPlatform:  'Plateforme',
+    footerCompany:   'Entreprise',
+    footerAbout:     'À Propos',
+    footerPrivacy:   'Confidentialité',
+    footerTerms:     'Conditions',
+    footerContact:   'Contact',
+    footerCopyright: '© 2026 BibloTalk. Tous droits réservés.',
+    footerMadeWith:  'Fait avec',
+    footerMadeFor:   'pour la communauté chrétienne mondiale',
+  },
+
+  // ── HAITIAN CREOLE ────────────────────────────────────────────────────────
+  ht: {
+    navHome:    'Akèy',
+    navGroups:  'Gwoup',
+    navDebates: 'Deba',
+    navLogin:   'Koneksyon',
+    navJoin:    'Rantre',
+
+    heroBadge:         'Platfòm Kominote Biblik',
+    heroTitle1:        'Diskisyon biblik,',
+    heroTitle2:        'òganize ak respè',
+    heroSubtitle:      'Etidye Pawòl la. Pataje panse ou. Grandi espirityèlman.',
+    heroCta:           'Kòmanse Kounye a',
+    heroCtaSecondary:  'Eksplore Deba',
+    heroTrust:         'Gratis · San kat kredi · Pou kwayan yo',
+    heroVerseBadge:    'Vèsè Jou a',
+    heroVerse:         '« Pawòl ou se yon flambò pou pye m, yon limyè sou wout mwen. »',
+    heroVerseRef:      '— Sòm 119:105',
+
+    problemLabel: 'Defi a',
+    problemTitle: 'Poukisa diskisyon biblik yo vin dezòd',
+    prob1Title:   'Diskisyon Dezòganize',
+    prob1Desc:    'Kòmantè yo anpile san estrikti, sa ki fè li enposib pou swiv fil yo oswa jwenn enfòmasyon espesifik.',
+    prob2Title:   'Konvèsasyon Ki Difisil Pou Swiv',
+    prob2Desc:    'Sijè yo derape epi repons yo pèdi kontèks yo, sa ki kite lektè yo konfonn.',
+    prob3Title:   'Konfli San Estrikti',
+    prob3Desc:    'San règ klè ak moderation, konvèsasyon yo vin dispite olye yo bay kwasans.',
+
+    solutionLabel: 'Solisyon an',
+    solutionTitle: 'BibloTalk mete lòd nan Pawòl la',
+    solutionDesc:  'Chak diskisyon anchore nan yon vèsè biblik. Chak kòmantè gen plas li. Chak kominote gen valè yo dakò sou yo.',
+    sol1Title: 'Deba Estrikti pa Vèsè Biblik',
+    sol1Desc:  'Chak deba kòmanse ak yon Ekriti espesifik — kenbe tout diskisyon anchore ak pètinan.',
+    sol2Title: 'Kòmantè Òganize',
+    sol2Desc:  'Repons imbriye ak vòt fè pi bon ide yo parèt san bwi.',
+    sol3Title: 'Kominote Respektye',
+    sol3Desc:  'Règleman kominote ak zouti rapò kenbe konvèsasyon yo rich, pa toksik.',
+    mockVerseBadge: 'Ankraj Diskisyon',
+    mockVerse:      '« Paske m konnen plan m gen pou nou… » — Jer 29:11',
+    mockComment1:   'Vèsè sa a ban m fòs chak maten !',
+    mockComment2:   'Nan kontèks ayisyen, sa pale sou espwa kolektif.',
+    mockComment3:   'Konpare ak Women 8:28 — menm pwomès divin !',
+    mockBadge:      'Respektye ✓',
+
+    howLabel:    'Pwosesis Senp',
+    howTitle:    'Kijan Sa Travay',
+    howSubtitle: 'Twa etap senp pou konvèsasyon biblik ki gen sans',
+    step1Title: 'Rantre nan yon Gwoup',
+    step1Desc:  'Navige gwoup ki egziste deja oswa kreye pa ou a sou yon tèm, denominasyon oswa lang.',
+    step2Title: 'Chwazi yon Vèsè',
+    step2Desc:  'Chwazi nenpòt vèsè biblik kòm fondasyon deba ou a — chèche pa liv, chapit oswa mo kle.',
+    step3Title: 'Patisipe nan Diskisyon an',
+    step3Desc:  'Pataje entèpretasyon ou, reponn lòt moun ak respè, epi grandi ansanm nan Pawòl la.',
+
+    featLabel: 'Sa Ou Jwenn',
+    featTitle: 'Tout sa ou bezwen pou etid pwofon',
+    feat1Title: 'Gwoup',
+    feat1Desc:  'Gwoup piblik ak prive pou legliz, sèk etid biblik, ak kominote pèsonèl.',
+    feat1Tag1: 'Piblik', feat1Tag2: 'Prive', feat1Tag3: 'Miltilenng',
+    feat2Title: 'Deba pa Vèsè',
+    feat2Desc:  'Chak deba anchore nan Ekriti — pa gen derape sou lòt sijè.',
+    feat2Tag1: 'Estrikti', feat2Tag2: 'Ekriti an premye',
+    feat3Title: 'Kòmantè & Fil',
+    feat3Desc:  'Repons imbriye fè konvèsasyon fasil pou swiv. Reyaji ak vèsè, pa sèlman emòji.',
+    feat3Tag1: 'Imbriye', feat3Tag2: 'Reyaksyon vèsè',
+    feat4Title: 'Miltilenng',
+    feat4Desc:  'Patisipe nan lang ou. Kreyòl ayisyen, fransè, panyòl ak anglè — tout byenveni.',
+    feat5Title: 'Aplikasyon Mobil (PWA)',
+    feat5Desc:  'Enstale dirèkteman sou telefòn ou — pa bezwen magazen aplikasyon.',
+    feat6Title: 'Zouti Moderasyon',
+    feat6Desc:  'Administratè gwoup yo gen kontwòl total — aprouve manm, epingle diskisyon.',
+
+    rulesLabel:    'Estanda Nou',
+    rulesTitle:    'Règleman Kominote',
+    rulesSubtitle: 'Yon kote pou grandi nan lafwa, pa pou goumen. Se valè nou kenbe ansanm.',
+    rule1Title: 'Respè',
+    rule1Desc:  'Trete chak moun ak diyite yo merite kòm yon kwayan ak yon moun.',
+    rule2Title: 'Pa Ensilt',
+    rule2Desc:  'Defi ide, pa moun nan. Atak pèsonèl ak moke pa pèmèt.',
+    rule3Title: 'Itilize Vèsè Biblik',
+    rule3Desc:  'Sipòte agiman ou ak Ekriti. Opinyon la byenveni; Pawòl la se ankraj la.',
+    rule4Title: 'Aprann, Pa Atake',
+    rule4Desc:  'Vini ak yon kè ouvè. Bi a se kwasans espirityèl pou tout moun nan konvèsasyon an.',
+
+    ctaTitle1:        'Rantre nan premye gwoup la :',
+    ctaGroupName:     'Èd pou Nanm',
+    ctaGroupName2:    'Èd pou Nanm (Aide aux Ames)',
+    ctaDesc:          'Yon espas cho ak miltilenng ki dedye pou ede nanm yo jwenn konsolasyon, gidans ak espwa atravè Pawòl la.',
+    ctaGroupMembers:  'Gwoup ouvè · KR, FR, EN, ES',
+    ctaBtn:           'Rantre Kounye a — Gratis',
+    ctaBtnSecondary:  'Aprann Plis',
+    ctaFine:          'Pa gen spam. Dezabòne nenpòt ki lè. Vwayaj lafwa ou se pa ou.',
+
+    footerTagline:   'Diskisyon biblik òganize ak respè. Grandi ansanm nan Pawòl la.',
+    footerPlatform:  'Platfòm',
+    footerCompany:   'Konpayi',
+    footerAbout:     'Sou Nou',
+    footerPrivacy:   'Konfidansyalite',
+    footerTerms:     'Kondisyon',
+    footerContact:   'Kontakte',
+    footerCopyright: '© 2026 BibloTalk. Tout dwa rezève.',
+    footerMadeWith:  'Fè ak',
+    footerMadeFor:   'pou kominote kretyen mondyal la',
+  },
+
+  // ── SPANISH ───────────────────────────────────────────────────────────────
+  es: {
+    navHome:    'Inicio',
+    navGroups:  'Grupos',
+    navDebates: 'Debates',
+    navLogin:   'Iniciar Sesión',
+    navJoin:    'Unirse',
+
+    heroBadge:         'Plataforma de Comunidad Bíblica',
+    heroTitle1:        'Discusiones bíblicas,',
+    heroTitle2:        'organizadas y respetuosas',
+    heroSubtitle:      'Estudia la Palabra. Comparte tus pensamientos. Crece espiritualmente.',
+    heroCta:           'Comenzar Ahora',
+    heroCtaSecondary:  'Explorar Debates',
+    heroTrust:         'Gratis · Sin tarjeta · Para creyentes',
+    heroVerseBadge:    'Versículo del Día',
+    heroVerse:         '«Tu palabra es una lámpara a mis pies y una lumbrera a mi camino.»',
+    heroVerseRef:      '— Salmo 119:105',
+
+    problemLabel: 'El Desafío',
+    problemTitle: 'Por qué las discusiones bíblicas se vuelven caóticas',
+    prob1Title:   'Discusiones Desorganizadas',
+    prob1Desc:    'Los comentarios se acumulan sin estructura, haciendo imposible seguir hilos o encontrar ideas específicas.',
+    prob2Title:   'Conversaciones Difíciles de Seguir',
+    prob2Desc:    'Los temas se desvían y las respuestas pierden contexto, dejando a los lectores confundidos.',
+    prob3Title:   'Conflictos Sin Estructura',
+    prob3Desc:    'Sin reglas claras y moderación, las conversaciones se convierten en argumentos en vez de crecimiento.',
+
+    solutionLabel: 'La Solución',
+    solutionTitle: 'BibloTalk trae orden a la Palabra',
+    solutionDesc:  'Cada discusión está anclada en un versículo bíblico. Cada comentario tiene su lugar. Cada comunidad comparte valores acordados.',
+    sol1Title: 'Debates Estructurados por Versículo',
+    sol1Desc:  'Cada debate comienza con una Escritura específica — manteniendo toda discusión relevante y enfocada.',
+    sol2Title: 'Comentarios Organizados',
+    sol2Desc:  'Las respuestas anidadas y los votos resaltan los mejores aportes sin ruido.',
+    sol3Title: 'Comunidad Respetuosa',
+    sol3Desc:  'Las pautas de la comunidad y las herramientas de reporte mantienen las conversaciones enriquecedoras.',
+    mockVerseBadge: 'Ancla de Discusión',
+    mockVerse:      '«Porque yo sé los pensamientos que tengo acerca de vosotros…» — Jer 29:11',
+    mockComment1:   '¡Este versículo me da fuerza cada mañana!',
+    mockComment2:   'En el contexto haitiano, habla de esperanza colectiva.',
+    mockComment3:   'Compara con Romanos 8:28 — ¡misma promesa divina!',
+    mockBadge:      'Respetuoso ✓',
+
+    howLabel:    'Proceso Simple',
+    howTitle:    'Cómo Funciona',
+    howSubtitle: 'Tres pasos simples para conversaciones bíblicas significativas',
+    step1Title: 'Unirse a un Grupo',
+    step1Desc:  'Explora grupos existentes o crea el tuyo propio en torno a un tema, denominación o idioma.',
+    step2Title: 'Elige un Versículo',
+    step2Desc:  'Selecciona cualquier versículo bíblico como base de tu debate — busca por libro, capítulo o palabra clave.',
+    step3Title: 'Participa en la Discusión',
+    step3Desc:  'Comparte tu interpretación, responde a los demás con respeto y crece juntos en la Palabra.',
+
+    featLabel: 'Lo Que Obtienes',
+    featTitle: 'Todo lo que necesitas para un estudio profundo',
+    feat1Title: 'Grupos',
+    feat1Desc:  'Grupos públicos y privados para iglesias, círculos de estudio bíblico y comunidades personales.',
+    feat1Tag1: 'Público', feat1Tag2: 'Privado', feat1Tag3: 'Multilingüe',
+    feat2Title: 'Debates por Versículo',
+    feat2Desc:  'Cada debate está anclado en las Escrituras — sin desvíos fuera del tema.',
+    feat2Tag1: 'Estructurado', feat2Tag2: 'La Escritura primero',
+    feat3Title: 'Comentarios & Hilos',
+    feat3Desc:  'Las respuestas anidadas facilitan el seguimiento. Reacciona con versículos, no solo emojis.',
+    feat3Tag1: 'Anidados', feat3Tag2: 'Reacciones bíblicas',
+    feat4Title: 'Multilingüe',
+    feat4Desc:  'Participa en tu idioma. Creol haitiano, francés, español e inglés — todos bienvenidos.',
+    feat5Title: 'App Móvil (PWA)',
+    feat5Desc:  'Instala directamente en tu teléfono — no necesitas tienda de apps.',
+    feat6Title: 'Herramientas de Moderación',
+    feat6Desc:  'Los administradores tienen control total — aprueba miembros, fija discusiones y elimina contenido dañino.',
+
+    rulesLabel:    'Nuestros Estándares',
+    rulesTitle:    'Reglas de la Comunidad',
+    rulesSubtitle: 'Un lugar para crecer en fe, no para pelear. Estos son los valores que compartimos.',
+    rule1Title: 'Respeto',
+    rule1Desc:  'Trata a cada persona con la dignidad que merece como creyente y ser humano.',
+    rule2Title: 'Sin Insultos',
+    rule2Desc:  'Desafía las ideas, nunca a la persona. Los ataques personales y las burlas no están permitidos.',
+    rule3Title: 'Usa Versículos Bíblicos',
+    rule3Desc:  'Apoya tus argumentos con las Escrituras. La opinión es bienvenida; la Palabra es el ancla.',
+    rule4Title: 'Aprender, No Atacar',
+    rule4Desc:  'Ven con un corazón abierto. El objetivo es el crecimiento espiritual de todos en la conversación.',
+
+    ctaTitle1:        'Únete al primer grupo:',
+    ctaGroupName:     'Aide aux Ames',
+    ctaGroupName2:    'Aide aux Ames',
+    ctaDesc:          'Un espacio cálido y multilingüe dedicado a ayudar a las almas a encontrar consuelo, guía y esperanza a través de la Palabra.',
+    ctaGroupMembers:  'Grupo abierto · HT, FR, EN, ES',
+    ctaBtn:           'Unirse Ahora — Es Gratis',
+    ctaBtnSecondary:  'Más Información',
+    ctaFine:          'Sin spam. Cancela cuando quieras. Tu camino de fe es tuyo.',
+
+    footerTagline:   'Discusiones bíblicas organizadas y respetuosas. Crece junto en la Palabra.',
+    footerPlatform:  'Plataforma',
+    footerCompany:   'Empresa',
+    footerAbout:     'Acerca de',
+    footerPrivacy:   'Privacidad',
+    footerTerms:     'Términos',
+    footerContact:   'Contacto',
+    footerCopyright: '© 2026 BibloTalk. Todos los derechos reservados.',
+    footerMadeWith:  'Hecho con',
+    footerMadeFor:   'para la comunidad cristiana global',
+  }
+};
+
+// ── LANGUAGE SWITCHER ─────────────────────────────────────────────────────
+let currentLang = 'en';
+
+function setLang(lang) {
+  if (!T[lang]) return;
+  currentLang = lang;
+
+  // Update all [data-i18n] elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (T[lang][key] !== undefined) {
+      el.textContent = T[lang][key];
+    }
+  });
+
+  // Highlight active lang buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  // Update html lang attribute
+  document.documentElement.lang = lang === 'ht' ? 'ht' : lang;
+}
+
+// ── MOBILE MENU ───────────────────────────────────────────────────────────
+let menuOpen = false;
+function toggleMobile() {
+  menuOpen = !menuOpen;
+  const menu = document.getElementById('mobile-menu');
+  menu.classList.toggle('open', menuOpen);
+  // Animate hamburger → X
+  document.getElementById('hb1').style.transform = menuOpen ? 'rotate(45deg) translateY(7px)' : '';
+  document.getElementById('hb2').style.opacity   = menuOpen ? '0' : '1';
+  document.getElementById('hb3').style.transform = menuOpen ? 'rotate(-45deg) translateY(-7px)' : '';
+}
+
+// ── NAVBAR SCROLL SHADOW ──────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+// ── INTERSECTION OBSERVER (fade-in on scroll) ─────────────────────────────
+const observer = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('fade-in'); observer.unobserve(e.target); } }),
+  { threshold: 0.1 }
+);
+document.querySelectorAll('.card-lift, section > div').forEach(el => observer.observe(el));
+
+// ── PWA: SERVICE WORKER ───────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
