@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BibloTalk — Admin Dashboard</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            royal:  '#1E3A8A',
+            gold:   '#D4AF37',
+            forest: '#16A34A',
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    /* Sidebar */
+    #sidebar { transition: transform 0.3s ease; }
+    #sidebar.closed { transform: translateX(-100%); }
+
+    /* Active nav item */
+    .nav-item.active { background: rgba(255,255,255,0.15); }
+    .nav-item { transition: background 0.15s ease; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Status badges */
+    .badge-active  { background:#dcfce7; color:#15803d; }
+    .badge-pending { background:#fef9c3; color:#a16207; }
+    .badge-banned  { background:#fee2e2; color:#dc2626; }
+    .badge-mod     { background:#dbeafe; color:#1d4ed8; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:#f1f5f9; }
+    ::-webkit-scrollbar-thumb { background:#1E3A8A; border-radius:3px; }
+  </style>
+</head>
+
+<body class="h-full bg-gray-50 flex overflow-hidden">
+
+<!-- ══════════════════════════════
+     SIDEBAR
+══════════════════════════════ -->
+<aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-royal flex flex-col shadow-xl">
+
+  <!-- Logo -->
+  <div class="px-6 py-5 border-b border-white/10">
+    <a href="/" class="text-xl font-extrabold text-white tracking-tight">
+      Biblo<span class="text-gold">Talk</span>
+    </a>
+    <p class="text-blue-200 text-xs mt-0.5">Admin Dashboard</p>
+  </div>
+
+  <!-- User pill -->
+  <div class="px-4 py-4 border-b border-white/10">
+    <div class="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gold flex items-center justify-center text-white font-bold text-sm" id="avatar">A</div>
+      <div class="min-w-0">
+        <p class="text-white text-sm font-semibold truncate" id="display-name">Admin</p>
+        <p class="text-blue-200 text-xs capitalize" id="role-badge">superadmin</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+    <button onclick="showTab('overview')"   class="nav-item active w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white text-sm font-medium" id="nav-overview">
+      <span class="text-base">📊</span> Overview
+    </button>
+    <button onclick="showTab('members')"    class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-members">
+      <span class="text-base">👥</span> Members
+    </button>
+    <button onclick="showTab('groups')"     class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-groups">
+      <span class="text-base">🏛️</span> Groups
+    </button>
+    <button onclick="showTab('debates')"    class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-debates">
+      <span class="text-base">⚖️</span> Debates
+    </button>
+    <button onclick="showTab('reports')"    class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-reports">
+      <span class="text-base">🚨</span> Reports
+      <span class="ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">3</span>
+    </button>
+    <button onclick="showTab('committee')"  class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-committee">
+      <span class="text-base">🛡️</span> Committee
+    </button>
+    <button onclick="showTab('settings')"   class="nav-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium" id="nav-settings">
+      <span class="text-base">⚙️</span> Settings
+    </button>
+  </nav>
+
+  <!-- Logout -->
+  <div class="px-4 py-4 border-t border-white/10">
+    <button onclick="logout()"
+      class="w-full flex items-center gap-2 text-red-300 hover:text-white hover:bg-red-500/20 transition-colors px-3 py-2.5 rounded-xl text-sm font-medium">
+      <span>🚪</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="overlay" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden" onclick="toggleSidebar()"></div>
+
+
+<!-- ══════════════════════════════
+     MAIN CONTENT
+══════════════════════════════ -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+  <!-- Top bar -->
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 py-3 flex items-center gap-3 shadow-sm">
+    <!-- Mobile hamburger -->
+    <button onclick="toggleSidebar()" class="lg:hidden flex flex-col gap-1 p-1.5 mr-1">
+      <span class="block w-5 h-0.5 bg-gray-600"></span>
+      <span class="block w-5 h-0.5 bg-gray-600"></span>
+      <span class="block w-5 h-0.5 bg-gray-600"></span>
+    </button>
+
+    <!-- Page title -->
+    <div class="flex-1 min-w-0">
+      <h1 class="text-base font-bold text-gray-900 truncate" id="page-title">Overview</h1>
+      <p class="text-xs text-gray-400" id="page-subtitle">Welcome back to BibloTalk admin</p>
+    </div>
+
+    <!-- Right actions -->
+    <div class="flex items-center gap-2">
+      <!-- Notification bell -->
+      <button class="relative p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+        🔔
+        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+      <!-- Visit site -->
+      <a href="/" target="_blank"
+        class="hidden sm:flex items-center gap-1.5 bg-royal text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-900 transition-colors">
+        <span>🌐</span> Visit Site
+      </a>
+    </div>
+  </header>
+
+  <!-- Scrollable content area -->
+  <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+
+    <!-- ── OVERVIEW TAB ─────────────────────────────────────── -->
+    <div id="tab-overview" class="tab-panel active">
+
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Members</p>
+          <p class="text-3xl font-extrabold text-gray-900 mt-1">247</p>
+          <p class="text-xs text-forest font-semibold mt-1">↑ +12 this week</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Active Groups</p>
+          <p class="text-3xl font-extrabold text-gray-900 mt-1">8</p>
+          <p class="text-xs text-forest font-semibold mt-1">↑ +2 this month</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Debates Open</p>
+          <p class="text-3xl font-extrabold text-gray-900 mt-1">34</p>
+          <p class="text-xs text-gold font-semibold mt-1">→ 5 awaiting review</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Reports</p>
+          <p class="text-3xl font-extrabold text-royal mt-1">3</p>
+          <p class="text-xs text-red-500 font-semibold mt-1">⚠ Needs attention</p>
+        </div>
+      </div>
+
+      <!-- Two-col grid -->
+      <div class="grid lg:grid-cols-2 gap-5">
+
+        <!-- Recent activity -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <h3 class="font-bold text-gray-900 text-sm">Recent Activity</h3>
+            <span class="text-xs text-gray-400">Live</span>
+          </div>
+          <ul class="divide-y divide-gray-50">
+            <li class="px-5 py-3 flex items-start gap-3">
+              <span class="text-base mt-0.5">🆕</span>
+              <div class="min-w-0">
+                <p class="text-sm text-gray-800 font-medium">Marie Joseph joined <strong>Aide aux Ames</strong></p>
+                <p class="text-xs text-gray-400 mt-0.5">2 minutes ago</p>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-start gap-3">
+              <span class="text-base mt-0.5">💬</span>
+              <div class="min-w-0">
+                <p class="text-sm text-gray-800 font-medium">New debate opened on <strong>Psalm 23</strong></p>
+                <p class="text-xs text-gray-400 mt-0.5">15 minutes ago</p>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-start gap-3">
+              <span class="text-base mt-0.5">🚨</span>
+              <div class="min-w-0">
+                <p class="text-sm text-red-600 font-medium">Report submitted in <strong>Groupe Évangile</strong></p>
+                <p class="text-xs text-gray-400 mt-0.5">1 hour ago</p>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-start gap-3">
+              <span class="text-base mt-0.5">✅</span>
+              <div class="min-w-0">
+                <p class="text-sm text-gray-800 font-medium">Jean Alce's account <strong>approved</strong></p>
+                <p class="text-xs text-gray-400 mt-0.5">3 hours ago</p>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-start gap-3">
+              <span class="text-base mt-0.5">🏛️</span>
+              <div class="min-w-0">
+                <p class="text-sm text-gray-800 font-medium">New group <strong>Étude Romans</strong> created</p>
+                <p class="text-xs text-gray-400 mt-0.5">Yesterday</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Pending approvals -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <h3 class="font-bold text-gray-900 text-sm">Pending Approvals</h3>
+            <span class="text-xs font-bold text-gold bg-yellow-50 px-2 py-0.5 rounded-full">4 pending</span>
+          </div>
+          <ul class="divide-y divide-gray-50">
+            <li class="px-5 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-royal font-bold text-sm flex-shrink-0">P</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">Pierre Dupont</p>
+                <p class="text-xs text-gray-400">Requested Aide aux Ames · FR</p>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="approve(this)" class="bg-forest text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-green-700 transition-colors">✓</button>
+                <button onclick="deny(this)"    class="bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-200 transition-colors">✕</button>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center text-forest font-bold text-sm flex-shrink-0">A</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">Aline Beaumont</p>
+                <p class="text-xs text-gray-400">Requested Groupe Évangile · HT</p>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="approve(this)" class="bg-forest text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-green-700 transition-colors">✓</button>
+                <button onclick="deny(this)"    class="bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-200 transition-colors">✕</button>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold text-sm flex-shrink-0">R</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">Roberto Sánchez</p>
+                <p class="text-xs text-gray-400">Requested Estudio Bíblico · ES</p>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="approve(this)" class="bg-forest text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-green-700 transition-colors">✓</button>
+                <button onclick="deny(this)"    class="bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-200 transition-colors">✕</button>
+              </div>
+            </li>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-sm flex-shrink-0">S</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">Sophie Martin</p>
+                <p class="text-xs text-gray-400">Requested Aide aux Ames · FR</p>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="approve(this)" class="bg-forest text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-green-700 transition-colors">✓</button>
+                <button onclick="deny(this)"    class="bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-200 transition-colors">✕</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ── MEMBERS TAB ─────────────────────────────────────── -->
+    <div id="tab-members" class="tab-panel">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-50">
+          <h3 class="font-bold text-gray-900">All Members</h3>
+          <div class="flex gap-2">
+            <input type="text" placeholder="Search members…" oninput="filterTable('members-tbody', this.value)"
+              class="text-sm px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal" />
+            <button onclick="showTab('members')" class="bg-royal text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-900 transition-colors">+ Invite</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                <th class="text-left px-5 py-3 font-semibold">Member</th>
+                <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Language</th>
+                <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Group</th>
+                <th class="text-left px-4 py-3 font-semibold">Status</th>
+                <th class="text-left px-4 py-3 font-semibold hidden lg:table-cell">Joined</th>
+                <th class="px-4 py-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody" class="divide-y divide-gray-50">
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-royal text-white text-xs flex items-center justify-center font-bold">M</div><span class="font-medium text-gray-900">Marie Joseph</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">HT</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">Aide aux Ames</td>
+                <td class="px-4 py-3"><span class="badge-active text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden lg:table-cell">Apr 28, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">Manage</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-forest text-white text-xs flex items-center justify-center font-bold">J</div><span class="font-medium text-gray-900">Jean Alce</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">HT/EN</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">Aide aux Ames</td>
+                <td class="px-4 py-3"><span class="badge-mod text-xs font-semibold px-2 py-0.5 rounded-full">Moderator</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden lg:table-cell">Mar 01, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">Manage</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-gold text-white text-xs flex items-center justify-center font-bold">S</div><span class="font-medium text-gray-900">Sophie Martin</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">FR</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">Groupe Évangile</td>
+                <td class="px-4 py-3"><span class="badge-pending text-xs font-semibold px-2 py-0.5 rounded-full">Pending</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden lg:table-cell">May 01, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">Manage</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-red-400 text-white text-xs flex items-center justify-center font-bold">T</div><span class="font-medium text-gray-900">Thomas K.</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">EN</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">—</td>
+                <td class="px-4 py-3"><span class="badge-banned text-xs font-semibold px-2 py-0.5 rounded-full">Banned</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden lg:table-cell">Feb 14, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">Manage</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-purple-400 text-white text-xs flex items-center justify-center font-bold">R</div><span class="font-medium text-gray-900">Roberto Sánchez</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">ES</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">Estudio Bíblico</td>
+                <td class="px-4 py-3"><span class="badge-active text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden lg:table-cell">Apr 15, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">Manage</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── GROUPS TAB ─────────────────────────────────────── -->
+    <div id="tab-groups" class="tab-panel">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-gray-900">Active Groups</h3>
+        <button class="bg-royal text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-blue-900 transition-colors shadow-sm">+ New Group</button>
+      </div>
+      <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Group card macro -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-royal/30 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-royal flex items-center justify-center text-xl">✝️</div>
+            <div>
+              <p class="font-bold text-gray-900 text-sm">Aide aux Ames</p>
+              <p class="text-xs text-gray-400">HT · FR · EN · ES</p>
+            </div>
+            <span class="ml-auto w-2 h-2 rounded-full bg-forest"></span>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-500 mb-4">
+            <span>👥 82 members</span>
+            <span>💬 19 debates</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 text-center bg-blue-50 text-royal text-xs font-semibold py-1.5 rounded-lg hover:bg-blue-100 transition-colors">Manage</button>
+            <button class="flex-1 text-center bg-gray-50 text-gray-600 text-xs font-semibold py-1.5 rounded-lg hover:bg-gray-100 transition-colors">Archive</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-royal/30 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-gold flex items-center justify-center text-xl">📖</div>
+            <div>
+              <p class="font-bold text-gray-900 text-sm">Groupe Évangile</p>
+              <p class="text-xs text-gray-400">FR · HT</p>
+            </div>
+            <span class="ml-auto w-2 h-2 rounded-full bg-forest"></span>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-500 mb-4">
+            <span>👥 45 members</span>
+            <span>💬 8 debates</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 text-center bg-blue-50 text-royal text-xs font-semibold py-1.5 rounded-lg hover:bg-blue-100 transition-colors">Manage</button>
+            <button class="flex-1 text-center bg-gray-50 text-gray-600 text-xs font-semibold py-1.5 rounded-lg hover:bg-gray-100 transition-colors">Archive</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-royal/30 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-forest flex items-center justify-center text-xl">🕊️</div>
+            <div>
+              <p class="font-bold text-gray-900 text-sm">Estudio Bíblico</p>
+              <p class="text-xs text-gray-400">ES · EN</p>
+            </div>
+            <span class="ml-auto w-2 h-2 rounded-full bg-forest"></span>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-500 mb-4">
+            <span>👥 33 members</span>
+            <span>💬 5 debates</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 text-center bg-blue-50 text-royal text-xs font-semibold py-1.5 rounded-lg hover:bg-blue-100 transition-colors">Manage</button>
+            <button class="flex-1 text-center bg-gray-50 text-gray-600 text-xs font-semibold py-1.5 rounded-lg hover:bg-gray-100 transition-colors">Archive</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-royal/30 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center text-xl">📜</div>
+            <div>
+              <p class="font-bold text-gray-900 text-sm">Étude Romans</p>
+              <p class="text-xs text-gray-400">FR · EN</p>
+            </div>
+            <span class="ml-auto w-2 h-2 rounded-full bg-yellow-400"></span>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-500 mb-4">
+            <span>👥 21 members</span>
+            <span>💬 2 debates</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 text-center bg-blue-50 text-royal text-xs font-semibold py-1.5 rounded-lg hover:bg-blue-100 transition-colors">Manage</button>
+            <button class="flex-1 text-center bg-gray-50 text-gray-600 text-xs font-semibold py-1.5 rounded-lg hover:bg-gray-100 transition-colors">Archive</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── DEBATES TAB ─────────────────────────────────────── -->
+    <div id="tab-debates" class="tab-panel">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-50">
+          <h3 class="font-bold text-gray-900">All Debates</h3>
+          <input type="text" placeholder="Search debates…" oninput="filterTable('debates-tbody', this.value)"
+            class="text-sm px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal" />
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                <th class="text-left px-5 py-3 font-semibold">Verse / Topic</th>
+                <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Group</th>
+                <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Comments</th>
+                <th class="text-left px-4 py-3 font-semibold">Status</th>
+                <th class="px-4 py-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="debates-tbody" class="divide-y divide-gray-50">
+              <tr>
+                <td class="px-5 py-3"><p class="font-semibold text-gray-900">Psalm 23:1</p><p class="text-xs text-gray-400">The Lord is my shepherd</p></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">Aide aux Ames</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">24</td>
+                <td class="px-4 py-3"><span class="badge-active text-xs font-semibold px-2 py-0.5 rounded-full">Open</span></td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">View</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><p class="font-semibold text-gray-900">Jeremiah 29:11</p><p class="text-xs text-gray-400">Plans to prosper you</p></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">Groupe Évangile</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">17</td>
+                <td class="px-4 py-3"><span class="badge-active text-xs font-semibold px-2 py-0.5 rounded-full">Open</span></td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">View</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><p class="font-semibold text-gray-900">Romans 8:28</p><p class="text-xs text-gray-400">All things work together</p></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">Estudio Bíblico</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">9</td>
+                <td class="px-4 py-3"><span class="badge-pending text-xs font-semibold px-2 py-0.5 rounded-full">Review</span></td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">View</button></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><p class="font-semibold text-gray-900">John 3:16</p><p class="text-xs text-gray-400">For God so loved the world</p></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">Aide aux Ames</td>
+                <td class="px-4 py-3 text-gray-500 hidden md:table-cell">41</td>
+                <td class="px-4 py-3"><span class="badge-active text-xs font-semibold px-2 py-0.5 rounded-full">Open</span></td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-royal text-xs font-medium transition-colors">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── REPORTS TAB ─────────────────────────────────────── -->
+    <div id="tab-reports" class="tab-panel">
+      <div class="space-y-4">
+        <div class="bg-white rounded-2xl border border-red-100 shadow-sm p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🚨</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <p class="font-bold text-gray-900 text-sm">Insulting comment in Groupe Évangile</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Reported by <strong>Marie Joseph</strong> · 1 hour ago</p>
+                </div>
+                <span class="badge-banned text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0">High</span>
+              </div>
+              <p class="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 italic">"Your interpretation is completely wrong and you clearly don't understand the Bible..."</p>
+              <div class="mt-3 flex gap-2">
+                <button class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors">Remove Comment</button>
+                <button class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-orange-200 transition-colors">Warn User</button>
+                <button class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-yellow-100 shadow-sm p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">⚠️</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <p class="font-bold text-gray-900 text-sm">Off-topic content in Aide aux Ames</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Reported by <strong>Jean Alce</strong> · 3 hours ago</p>
+                </div>
+                <span class="badge-pending text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0">Medium</span>
+              </div>
+              <p class="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 italic">"User posted political content unrelated to the Bible verse being discussed..."</p>
+              <div class="mt-3 flex gap-2">
+                <button class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors">Remove Content</button>
+                <button class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-orange-200 transition-colors">Warn User</button>
+                <button class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-blue-100 shadow-sm p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📋</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <p class="font-bold text-gray-900 text-sm">Spam in Estudio Bíblico</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Reported by <strong>Roberto Sánchez</strong> · Yesterday</p>
+                </div>
+                <span class="badge-mod text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0">Low</span>
+              </div>
+              <p class="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 italic">"User posted repeated identical comments across multiple debates..."</p>
+              <div class="mt-3 flex gap-2">
+                <button class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors">Remove Content</button>
+                <button class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-orange-200 transition-colors">Warn User</button>
+                <button class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── COMMITTEE TAB ─────────────────────────────────────── -->
+    <div id="tab-committee" class="tab-panel">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-5">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+          <h3 class="font-bold text-gray-900">Committee Members</h3>
+          <button onclick="showAddCommittee()" class="bg-royal text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-900 transition-colors shadow-sm">+ Add Member</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                <th class="text-left px-5 py-3 font-semibold">Name</th>
+                <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Username</th>
+                <th class="text-left px-4 py-3 font-semibold">Role</th>
+                <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Last Login</th>
+                <th class="px-4 py-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="committee-tbody" class="divide-y divide-gray-50">
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-royal text-white text-xs flex items-center justify-center font-bold">A</div><span class="font-medium text-gray-900">Super Admin</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell font-mono text-xs">admin</td>
+                <td class="px-4 py-3"><span class="bg-blue-100 text-royal text-xs font-bold px-2 py-0.5 rounded-full">Super Admin</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden md:table-cell">Just now</td>
+                <td class="px-4 py-3 text-center"><span class="text-xs text-gray-300">—</span></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-gold text-white text-xs flex items-center justify-center font-bold">C</div><span class="font-medium text-gray-900">Comité Membre 1</span></div></td>
+                <td class="px-4 py-3 text-gray-500 hidden sm:table-cell font-mono text-xs">comite1</td>
+                <td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded-full">Moderator</span></td>
+                <td class="px-4 py-3 text-gray-400 hidden md:table-cell">Apr 30, 2026</td>
+                <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-red-500 text-xs font-medium transition-colors">Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add committee member form -->
+      <div id="add-committee-form" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-6">
+        <h4 class="font-bold text-gray-900 mb-4">Add Committee Member</h4>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Display Name</label>
+            <input type="text" id="new-name" placeholder="Full name" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Username</label>
+            <input type="text" id="new-username" placeholder="login username" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Temporary Password</label>
+            <input type="password" id="new-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Role</label>
+            <select id="new-role" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-royal/20 focus:border-royal bg-white">
+              <option value="moderator">Moderator</option>
+              <option value="admin">Admin</option>
+              <option value="superadmin">Super Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+          <button onclick="addCommitteeMember()" class="bg-royal text-white font-bold px-5 py-2.5 rounded-xl hover:bg-blue-900 transition-colors text-sm">Add Member</button>
+          <button onclick="hideAddCommittee()" class="bg-gray-100 text-gray-600 font-bold px-5 py-2.5 rounded-xl hover:bg-gray-200 transition-colors text-sm">Cancel</button>
+        </div>
+        <p class="mt-3 text-xs text-gray-400">⚠️ Share credentials securely. Members should change their password on first login.</p>
+      </div>
+    </div>
+
+
+    <!-- ── SETTINGS TAB ─────────────────────────────────────── -->
+    <div id="tab-settings" class="tab-panel">
+      <div class="grid lg:grid-cols-2 gap-5">
+
+        <!-- Platform settings -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 class="font-bold text-gray-900 mb-4">Platform Settings</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <p class="text-sm font-medium text-gray-900">New member approval</p>
+                <p class="text-xs text-gray-400 mt-0.5">Require admin approval for new members</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer" />
+                <div class="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-royal transition-colors peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Email notifications</p>
+                <p class="text-xs text-gray-400 mt-0.5">Send email alerts for new reports</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer" />
+                <div class="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-royal transition-colors peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Public registration</p>
+                <p class="text-xs text-gray-400 mt-0.5">Allow anyone to create an account</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" />
+                <div class="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-royal transition-colors peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Maintenance mode</p>
+                <p class="text-xs text-gray-400 mt-0.5">Take the platform offline temporarily</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" />
+                <div class="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-red-500 transition-colors peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Community rules editor -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 class="font-bold text-gray-900 mb-4">Community Rules</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <span class="text-base">🕊️</span>
+              <input type="text" value="Respect every person in the community" class="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none" />
+              <button class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none">×</button>
+            </div>
+            <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <span class="text-base">🚫</span>
+              <input type="text" value="No personal insults or mockery" class="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none" />
+              <button class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none">×</button>
+            </div>
+            <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <span class="text-base">📜</span>
+              <input type="text" value="Back all arguments with Bible verses" class="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none" />
+              <button class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none">×</button>
+            </div>
+            <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <span class="text-base">🌱</span>
+              <input type="text" value="Come to learn, not to attack" class="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none" />
+              <button class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none">×</button>
+            </div>
+            <button class="w-full border-2 border-dashed border-gray-200 text-gray-400 text-sm font-medium py-2 rounded-xl hover:border-royal/40 hover:text-royal transition-colors">+ Add Rule</button>
+          </div>
+          <button class="mt-4 bg-forest text-white font-bold px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm w-full">Save Rules</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+
+<!-- ═══════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════ -->
+<script>
+  // ── AUTH GUARD ────────────────────────────────────────────────────────────
+  (function guard() {
+    const raw = localStorage.getItem('bt_admin_session') || sessionStorage.getItem('bt_admin_session');
+    if (!raw) return (window.location.href = '/admin/index.html');
+    const s = JSON.parse(raw);
+    if (!s || s.expires < Date.now()) return (window.location.href = '/admin/index.html');
+    // Populate UI
+    document.getElementById('display-name').textContent = s.displayName || s.username;
+    document.getElementById('role-badge').textContent   = s.role;
+    document.getElementById('avatar').textContent       = (s.displayName || s.username)[0].toUpperCase();
+  })();
+
+  // ── TAB SWITCHER ──────────────────────────────────────────────────────────
+  const TAB_TITLES = {
+    overview:  ['Overview',   'Welcome back to BibloTalk admin'],
+    members:   ['Members',    'Manage platform members'],
+    groups:    ['Groups',     'Manage community groups'],
+    debates:   ['Debates',    'Browse and moderate debates'],
+    reports:   ['Reports',    'Review flagged content'],
+    committee: ['Committee',  'Manage admin committee access'],
+    settings:  ['Settings',   'Configure platform settings'],
+  };
+
+  function showTab(tab) {
+    // Hide all panels, deactivate all nav items
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.remove('active');
+      n.classList.add('text-white/80');
+      n.classList.remove('text-white');
+    });
+    // Activate chosen
+    document.getElementById('tab-' + tab).classList.add('active');
+    const navBtn = document.getElementById('nav-' + tab);
+    navBtn.classList.add('active');
+    navBtn.classList.remove('text-white/80');
+    navBtn.classList.add('text-white');
+    // Update header
+    document.getElementById('page-title').textContent    = TAB_TITLES[tab][0];
+    document.getElementById('page-subtitle').textContent = TAB_TITLES[tab][1];
+    // Close sidebar on mobile
+    if (window.innerWidth < 1024) hideSidebar();
+  }
+
+  // ── SIDEBAR TOGGLE ────────────────────────────────────────────────────────
+  function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('overlay');
+    sb.classList.toggle('closed');
+    ov.classList.toggle('hidden');
+  }
+  function hideSidebar() {
+    document.getElementById('sidebar').classList.add('closed');
+    document.getElementById('overlay').classList.add('hidden');
+  }
+  // Close sidebar on mobile by default
+  if (window.innerWidth < 1024) document.getElementById('sidebar').classList.add('closed');
+
+  // ── TABLE FILTER ──────────────────────────────────────────────────────────
+  function filterTable(tbodyId, query) {
+    const rows = document.querySelectorAll('#' + tbodyId + ' tr');
+    const q = query.toLowerCase();
+    rows.forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  // ── APPROVAL ACTIONS ──────────────────────────────────────────────────────
+  function approve(btn) {
+    const li = btn.closest('li');
+    li.style.opacity = '0.5';
+    li.style.transition = 'opacity 0.3s';
+    setTimeout(() => li.remove(), 300);
+  }
+  function deny(btn) { approve(btn); }
+
+  // ── COMMITTEE FORM ────────────────────────────────────────────────────────
+  function showAddCommittee() { document.getElementById('add-committee-form').classList.remove('hidden'); }
+  function hideAddCommittee() { document.getElementById('add-committee-form').classList.add('hidden'); }
+  function addCommitteeMember() {
+    const name     = document.getElementById('new-name').value.trim();
+    const username = document.getElementById('new-username').value.trim();
+    const role     = document.getElementById('new-role').value;
+    if (!name || !username) { alert('Name and username are required.'); return; }
+    const tbody = document.getElementById('committee-tbody');
+    const initial = name[0].toUpperCase();
+    const colors  = ['bg-royal','bg-gold','bg-forest','bg-purple-500','bg-pink-500'];
+    const color   = colors[tbody.rows.length % colors.length];
+    const roleColors = { moderator:'bg-yellow-100 text-yellow-800', admin:'bg-orange-100 text-orange-800', superadmin:'bg-blue-100 text-royal' };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg ${color} text-white text-xs flex items-center justify-center font-bold">${initial}</div><span class="font-medium text-gray-900">${name}</span></div></td>
+      <td class="px-4 py-3 text-gray-500 hidden sm:table-cell font-mono text-xs">${username}</td>
+      <td class="px-4 py-3"><span class="${roleColors[role]} text-xs font-bold px-2 py-0.5 rounded-full capitalize">${role}</span></td>
+      <td class="px-4 py-3 text-gray-400 hidden md:table-cell">Just added</td>
+      <td class="px-4 py-3 text-center"><button class="text-gray-400 hover:text-red-500 text-xs font-medium transition-colors" onclick="this.closest('tr').remove()">Remove</button></td>
+    `;
+    tbody.appendChild(tr);
+    hideAddCommittee();
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-password').value = '';
+  }
+
+  // ── LOGOUT ────────────────────────────────────────────────────────────────
+  function logout() {
+    localStorage.removeItem('bt_admin_session');
+    sessionStorage.removeItem('bt_admin_session');
+    window.location.href = '/admin/index.html';
+  }
+</script>
+
+</body>
+</html>
