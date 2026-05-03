@@ -734,14 +734,23 @@
 <script>
   // ── AUTH GUARD ────────────────────────────────────────────────────────────
   (function guard() {
-    const raw = localStorage.getItem('bt_admin_session') || sessionStorage.getItem('bt_admin_session');
-    if (!raw) return (window.location.href = '/admin/index.html');
-    const s = JSON.parse(raw);
-    if (!s || s.expires < Date.now()) return (window.location.href = '/admin/index.html');
-    // Populate UI
-    document.getElementById('display-name').textContent = s.displayName || s.username;
-    document.getElementById('role-badge').textContent   = s.role;
-    document.getElementById('avatar').textContent       = (s.displayName || s.username)[0].toUpperCase();
+    try {
+      const raw = localStorage.getItem('bt_admin_session') || sessionStorage.getItem('bt_admin_session');
+      if (!raw) { window.location.href = '/admin/index.html'; return; }
+      const s = JSON.parse(raw);
+      if (!s || s.expires < Date.now()) {
+        localStorage.removeItem('bt_admin_session');
+        sessionStorage.removeItem('bt_admin_session');
+        window.location.href = '/admin/index.html';
+        return;
+      }
+      // Populate UI with session data
+      document.getElementById('display-name').textContent = s.displayName || s.username;
+      document.getElementById('role-badge').textContent   = s.role;
+      document.getElementById('avatar').textContent       = (s.displayName || s.username)[0].toUpperCase();
+    } catch (e) {
+      window.location.href = '/admin/index.html';
+    }
   })();
 
   // ── TAB SWITCHER ──────────────────────────────────────────────────────────

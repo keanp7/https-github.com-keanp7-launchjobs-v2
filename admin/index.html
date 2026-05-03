@@ -114,12 +114,12 @@
     // Default credentials → admin / BibloTalk2026!
     const MEMBERS = {
       admin: {
-        hash: 'e3e34e0143fdbe0a33e3bdf0d1f17b3c96b54ffe3dca4e7d1e2e1234b3c8b9a2',
+        hash: 'cab0352ad33387f1402010149a2e85717ff7306e06926734d8073b5200b2d40f',
         role: 'superadmin',
         displayName: 'Super Admin',
       },
       comite1: {
-        hash: '7c4a8d09ca3762af61e59520943dc26494f8941b',
+        hash: '6c6ffa149c9a354f0d10eec9b9689c04cd69906de5c3be13e8e380f60ca5df8b',
         role: 'moderator',
         displayName: 'Comité Membre 1',
       },
@@ -158,6 +158,7 @@
         storage.setItem('bt_admin_session', JSON.stringify(session));
         // Redirect to dashboard
         window.location.href = '/admin/dashboard.html';
+
       } else {
         setLoading(false);
         showError('Invalid username or password. Please try again.');
@@ -190,10 +191,12 @@
 
     // Redirect if already logged in
     (function checkSession() {
-      const s = JSON.parse(localStorage.getItem('bt_admin_session') || sessionStorage.getItem('bt_admin_session') || 'null');
-      if (s && s.expires > Date.now()) {
-        window.location.href = '/admin/dashboard.html';
-      }
+      try {
+        const raw = localStorage.getItem('bt_admin_session') || sessionStorage.getItem('bt_admin_session');
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s && s.expires > Date.now()) window.location.href = '/admin/dashboard.html';
+      } catch (e) { /* corrupt storage — ignore */ }
     })();
   </script>
 </body>
