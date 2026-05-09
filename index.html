@@ -99,6 +99,15 @@
     #mobile-menu.open {
       max-height: 400px;
     }
+
+    /* ── Donation progress bar animation ── */
+    .progress-bar-fill {
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .progress-bar-fill.animated {
+      width: 65%;
+    }
   </style>
 </head>
 
@@ -565,6 +574,104 @@
 
 
 <!-- ═══════════════════════════════════════════
+     DONATION IMPACT
+═══════════════════════════════════════════ -->
+<section id="donation" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+
+    <!-- Section header -->
+    <div class="text-center mb-14">
+      <span class="text-xs font-bold uppercase tracking-widest text-gold">Faith in Action</span>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold text-royal" data-i18n="donation.title">Put Faith Into Action</h2>
+      <p class="mt-3 text-gray-500 max-w-2xl mx-auto leading-relaxed" data-i18n="donation.subtitle">
+        Support brothers and sisters in need through transparent community giving.
+      </p>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="grid sm:grid-cols-3 gap-6 mb-14">
+
+      <!-- Card 1: Transparent Giving -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-blue-100 shadow-sm text-center">
+        <div class="w-14 h-14 mx-auto flex items-center justify-center bg-blue-50 rounded-2xl mb-4 text-3xl" aria-hidden="true">🔍</div>
+        <h3 class="font-bold text-lg mb-2" style="color:#1E3A8A" data-i18n="donation.transparent.title">Transparent Giving</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="donation.transparent.description">
+          Every contribution is tracked and visible to the community.
+        </p>
+      </div>
+
+      <!-- Card 2: Real Help -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-blue-100 shadow-sm text-center">
+        <div class="w-14 h-14 mx-auto flex items-center justify-center bg-green-50 rounded-2xl mb-4 text-3xl" aria-hidden="true">🤲</div>
+        <h3 class="font-bold text-lg mb-2" style="color:#1E3A8A" data-i18n="donation.realHelp.title">Real Help</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="donation.realHelp.description">
+          Donations support food, emergency assistance, and families in difficulty.
+        </p>
+      </div>
+
+      <!-- Card 3: Community Love -->
+      <div class="card-lift bg-white rounded-2xl p-6 border border-blue-100 shadow-sm text-center">
+        <div class="w-14 h-14 mx-auto flex items-center justify-center bg-yellow-50 rounded-2xl mb-4 text-3xl" aria-hidden="true">❤️</div>
+        <h3 class="font-bold text-lg mb-2" style="color:#1E3A8A" data-i18n="donation.community.title">Community Love</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="donation.community.description">
+          We live the teachings of Christ by helping one another.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Live fund preview card -->
+    <div class="max-w-md mx-auto bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+
+      <!-- Card header -->
+      <div class="bg-gradient-to-r from-royal to-blue-700 px-6 py-5">
+        <span class="text-xs font-bold uppercase tracking-widest" style="color:#D4AF37">Live Fund</span>
+        <h3 class="font-bold text-white text-xl mt-1" data-i18n="donation.fund.name">Aide aux Ames Relief Fund</h3>
+        <p class="text-blue-200 text-sm mt-1" data-i18n="donation.fund.description">Helping families facing urgent needs.</p>
+      </div>
+
+      <!-- Card body -->
+      <div class="px-6 py-6">
+
+        <!-- Goal / Raised labels -->
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-gray-500 font-medium">
+            <span data-i18n="donation.raised">Raised</span>: <strong class="text-gray-900">$3,250</strong>
+          </span>
+          <span class="text-xs text-gray-500 font-medium">
+            <span data-i18n="donation.goal">Goal</span>: <strong class="text-gray-900">$5,000</strong>
+          </span>
+        </div>
+
+        <!-- Animated progress bar -->
+        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden mb-2" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Fundraising progress">
+          <div id="donation-progress-bar" class="progress-bar-fill h-3 rounded-full" style="background:#16A34A"></div>
+        </div>
+
+        <div class="flex items-center justify-between mb-6">
+          <span class="text-xs font-bold" style="color:#16A34A">65%</span>
+          <span class="text-xs text-gray-400">
+            <strong class="text-gray-700">47</strong> <span data-i18n="donation.donors">donors</span>
+          </span>
+        </div>
+
+        <!-- Donate button -->
+        <a href="/donate"
+           class="block w-full text-center text-white font-bold py-3.5 rounded-full transition-all shadow-sm hover:shadow-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+           style="background:#16A34A"
+           onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16A34A'"
+           data-i18n="donation.button">
+          Donate Now
+        </a>
+
+      </div>
+    </div><!-- /fund card -->
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
      CTA SECTION
 ═══════════════════════════════════════════ -->
 <section id="cta" class="py-24 bg-white">
@@ -774,6 +881,22 @@ const T = {
     ctaBtnSecondary:  'Learn More',
     ctaFine:          'No spam. Unsubscribe at any time. Your faith journey is yours.',
 
+    // Donation Impact
+    'donation.title':                   'Put Faith Into Action',
+    'donation.subtitle':                'Support brothers and sisters in need through transparent community giving.',
+    'donation.transparent.title':       'Transparent Giving',
+    'donation.transparent.description': 'Every contribution is tracked and visible to the community.',
+    'donation.realHelp.title':          'Real Help',
+    'donation.realHelp.description':    'Donations support food, emergency assistance, and families in difficulty.',
+    'donation.community.title':         'Community Love',
+    'donation.community.description':   'We live the teachings of Christ by helping one another.',
+    'donation.fund.name':               'Aide aux Ames Relief Fund',
+    'donation.fund.description':        'Helping families facing urgent needs.',
+    'donation.goal':                    'Goal',
+    'donation.raised':                  'Raised',
+    'donation.donors':                  'donors',
+    'donation.button':                  'Donate Now',
+
     // Footer
     footerTagline:   'Biblical discussions, organized and respectful. Grow together in the Word.',
     footerPlatform:  'Platform',
@@ -880,6 +1003,22 @@ const T = {
     ctaBtnSecondary:  'En Savoir Plus',
     ctaFine:          'Aucun spam. Désinscription possible à tout moment.',
 
+    // Donation Impact
+    'donation.title':                   'Mettez la Foi en Action',
+    'donation.subtitle':                'Soutenez les frères et sœurs dans le besoin par des dons transparents.',
+    'donation.transparent.title':       'Dons Transparents',
+    'donation.transparent.description': 'Chaque contribution est suivie et visible par la communauté.',
+    'donation.realHelp.title':          'Aide Réelle',
+    'donation.realHelp.description':    'Les dons soutiennent l\'alimentation, l\'aide d\'urgence et les familles en difficulté.',
+    'donation.community.title':         'Amour Communautaire',
+    'donation.community.description':   'Nous vivons les enseignements du Christ en nous aidant mutuellement.',
+    'donation.fund.name':               'Fonds de Secours Aide aux Ames',
+    'donation.fund.description':        'Aider les familles confrontées à des besoins urgents.',
+    'donation.goal':                    'Objectif',
+    'donation.raised':                  'Collecté',
+    'donation.donors':                  'donateurs',
+    'donation.button':                  'Faire un Don',
+
     footerTagline:   'Des discussions bibliques organisées et respectueuses. Grandissez ensemble dans la Parole.',
     footerPlatform:  'Plateforme',
     footerCompany:   'Entreprise',
@@ -984,6 +1123,22 @@ const T = {
     ctaBtn:           'Rantre Kounye a — Gratis',
     ctaBtnSecondary:  'Aprann Plis',
     ctaFine:          'Pa gen spam. Dezabòne nenpòt ki lè. Vwayaj lafwa ou se pa ou.',
+
+    // Donation Impact
+    'donation.title':                   'Mete Lafwa an Aksyon',
+    'donation.subtitle':                'Sipòte frè ak sè ki nan bezwen atravè don ki transparan.',
+    'donation.transparent.title':       'Don Transparan',
+    'donation.transparent.description': 'Chak kontribisyon swivi epi vizib pou kominote a.',
+    'donation.realHelp.title':          'Vrè Èd',
+    'donation.realHelp.description':    'Don yo sipòte manje, asistans ijans, ak fanmi ki nan difikilte.',
+    'donation.community.title':         'Lanmou Kominote a',
+    'donation.community.description':   'Nou viv ansèyman Kris la lè nou ede youn lòt.',
+    'donation.fund.name':               'Fon Sekou Aide aux Ames',
+    'donation.fund.description':        'Ede fanmi ki fè fas ak bezwen ijan.',
+    'donation.goal':                    'Bi',
+    'donation.raised':                  'Ranmase',
+    'donation.donors':                  'donè',
+    'donation.button':                  'Fè Don Kounye a',
 
     footerTagline:   'Diskisyon biblik òganize ak respè. Grandi ansanm nan Pawòl la.',
     footerPlatform:  'Platfòm',
@@ -1090,6 +1245,22 @@ const T = {
     ctaBtnSecondary:  'Más Información',
     ctaFine:          'Sin spam. Cancela cuando quieras. Tu camino de fe es tuyo.',
 
+    // Donation Impact
+    'donation.title':                   'Pon tu Fe en Acción',
+    'donation.subtitle':                'Apoya a hermanos y hermanas en necesidad a través de donaciones transparentes.',
+    'donation.transparent.title':       'Donaciones Transparentes',
+    'donation.transparent.description': 'Cada contribución es rastreada y visible para la comunidad.',
+    'donation.realHelp.title':          'Ayuda Real',
+    'donation.realHelp.description':    'Las donaciones apoyan alimentos, asistencia de emergencia y familias en dificultad.',
+    'donation.community.title':         'Amor Comunitario',
+    'donation.community.description':   'Vivimos las enseñanzas de Cristo ayudándonos unos a otros.',
+    'donation.fund.name':               'Fondo de Socorro Aide aux Ames',
+    'donation.fund.description':        'Ayudando a familias con necesidades urgentes.',
+    'donation.goal':                    'Meta',
+    'donation.raised':                  'Recaudado',
+    'donation.donors':                  'donantes',
+    'donation.button':                  'Donar Ahora',
+
     footerTagline:   'Discusiones bíblicas organizadas y respetuosas. Crece junto en la Palabra.',
     footerPlatform:  'Plataforma',
     footerCompany:   'Empresa',
@@ -1150,6 +1321,22 @@ const observer = new IntersectionObserver(
   { threshold: 0.1 }
 );
 document.querySelectorAll('.card-lift, section > div').forEach(el => observer.observe(el));
+
+// ── DONATION PROGRESS BAR (animate on scroll into view) ───────────────────
+(function () {
+  const bar = document.getElementById('donation-progress-bar');
+  if (!bar) return;
+  const barObserver = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) {
+        bar.classList.add('animated');
+        barObserver.unobserve(e.target);
+      }
+    }),
+    { threshold: 0.5 }
+  );
+  barObserver.observe(bar);
+})();
 
 // ── PWA: SERVICE WORKER ───────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
