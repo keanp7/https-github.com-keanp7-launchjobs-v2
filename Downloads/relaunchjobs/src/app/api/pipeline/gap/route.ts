@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (rolesError) throw rolesError
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 2000,
       system: PROMPTS.GAP_ANALYSIS.system,
       messages: [{

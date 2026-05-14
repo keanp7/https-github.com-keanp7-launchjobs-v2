@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (fetchError) throw fetchError
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       system: PROMPTS.RISK_SCORE.system,
       messages: [{

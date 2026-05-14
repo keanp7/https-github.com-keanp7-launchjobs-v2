@@ -40,19 +40,23 @@ export async function POST(request: NextRequest) {
       hybrid_skills: existing.hybrid_skills,
     })
 
+    const userPrompt = PROMPTS.MATCH_ROLES.buildUser(candidateJSON, riskJSON)
+    console.log("Calling match with:", userPrompt.substring(0, 200))
+
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       system: PROMPTS.MATCH_ROLES.system,
       messages: [{
         role: "user",
-        content: PROMPTS.MATCH_ROLES.buildUser(candidateJSON, riskJSON),
+        content: userPrompt,
       }],
     })
 
     const raw = response.content[0].type === "text" ? response.content[0].text : ""
     const clean = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
     const parsed = JSON.parse(clean)
+    console.log("Match parsed result:", JSON.stringify(parsed, null, 2).substring(0, 500))
 
     const { error } = await supabase
       .from("role_matches")
