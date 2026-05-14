@@ -93,6 +93,15 @@ export function RolesDisplay() {
   if (loading) return <p className="text-muted-foreground animate-pulse">Finding your fastest path to reemployment…</p>
   if (!match) return null
 
+  if (!match || !match.target_roles || match.target_roles.length === 0) {
+    return (
+      <div style={{textAlign:'center', padding:'40px', color:'#6b7280'}}>
+        <p>Finding your best role matches...</p>
+        <p style={{fontSize:'13px', marginTop:'8px'}}>Complete the full analysis to see your target roles.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -100,7 +109,7 @@ export function RolesDisplay() {
           <CardTitle className="text-base">Your Best-Fit Roles</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {match.target_roles.map((role) => (
+          {(match.target_roles || []).map((role) => (
             <RoleCard
               key={role.title}
               role={role}

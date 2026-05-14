@@ -130,7 +130,7 @@ export default function AnalysisPage() {
                   opacity: 0
                 }}
               >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.name}</div>
+                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
                 <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
               </div>
             ))
@@ -163,7 +163,7 @@ export default function AnalysisPage() {
                   opacity: 0
                 }}
               >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.name}</div>
+                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
                 <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
                 {skill.ai_tool_pairing && (
                   <div style={{ color: '#7c3aed', fontSize: '12px', marginTop: '4px', fontWeight: 500 }}>
@@ -201,7 +201,7 @@ export default function AnalysisPage() {
                   opacity: 0
                 }}
               >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.name}</div>
+                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
                 <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
               </div>
             ))
@@ -221,21 +221,19 @@ export default function AnalysisPage() {
             🔍 What you didn't know you had
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {hiddenStrengths.map((strength: string, i: number) => (
-              <div 
-                key={i}
-                style={{
-                  backgroundColor: '#fdf3dc',
-                  color: '#c9952a',
-                  border: '1px solid rgba(201,149,42,0.3)',
-                  borderRadius: '20px',
-                  padding: '4px 14px',
-                  fontSize: '12px',
-                  margin: '4px 0'
-                }}
-              >
-                {strength}
-              </div>
+            {analysis.hidden_strengths?.map((item: any, i: number) => (
+              <span key={i} style={{
+                background: '#fdf3dc',
+                color: '#c9952a',
+                border: '1px solid rgba(201,149,42,0.3)',
+                borderRadius: '20px',
+                padding: '4px 14px',
+                fontSize: '12px',
+                margin: '4px',
+                display: 'inline-block'
+              }}>
+                {typeof item === 'string' ? item : item.strength || item.inferred_from || JSON.stringify(item)}
+              </span>
             ))}
           </div>
         </section>
