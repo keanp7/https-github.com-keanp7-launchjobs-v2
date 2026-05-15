@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
+import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
 import { createClient } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
 import type { CandidateIntake, ExtractResult, RiskResult, MatchResult, GapResult, LearningResult } from "@/types/pipeline"
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +23,8 @@ export async function POST(request: NextRequest) {
 
     const allOutputs = { extract, risk, match, gap, learning }
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+    const response = await getAnthropicClient().messages.create({
+      model: MODEL,
       max_tokens: 1500,
       system: PROMPTS.BUILD_PROFILE.system,
       messages: [{

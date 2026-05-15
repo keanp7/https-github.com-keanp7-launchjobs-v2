@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
+import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
 import { createClient } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,8 +30,8 @@ export async function POST(request: NextRequest) {
 
     if (rolesError) throw rolesError
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+    const response = await getAnthropicClient().messages.create({
+      model: MODEL,
       max_tokens: 2000,
       system: PROMPTS.GAP_ANALYSIS.system,
       messages: [{
