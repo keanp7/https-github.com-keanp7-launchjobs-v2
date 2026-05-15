@@ -87,7 +87,8 @@ export default function IntakePage() {
         body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
       })
       const riskData = await riskRes.json()
-      console.log('Risk route response:', riskData)
+      if (!riskRes.ok) throw new Error(riskData.details || 'Risk scoring failed')
+      console.log('[intake] Risk response:', riskData)
 
       // Step 3 - Role matching
       const matchRes = await fetch('/api/pipeline/match', {
@@ -95,6 +96,13 @@ export default function IntakePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
       })
+      if (!matchRes.ok) {
+        const e = await matchRes.json()
+        throw new Error(e.details || 'Role matching failed')
+      }
+      const matchData = await matchRes.json()
+      console.log('[intake] Match response:', JSON.stringify(matchData))
+      console.log('[intake] target_roles saved:', matchData?.data?.target_roles?.length, 'roles')
 
       // Step 4 - Gap analysis
       const gapRes = await fetch('/api/pipeline/gap', {
@@ -102,6 +110,13 @@ export default function IntakePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
       })
+      if (!gapRes.ok) {
+        const e = await gapRes.json()
+        console.warn('[intake] Gap analysis failed (non-fatal):', e.details)
+      } else {
+        const gapData = await gapRes.json()
+        console.log('[intake] Gap response:', gapData)
+      }
 
       clearInterval(interval)
       router.push('/analysis')

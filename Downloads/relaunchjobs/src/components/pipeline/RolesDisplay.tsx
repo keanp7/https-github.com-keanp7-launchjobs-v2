@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import type { MatchResult, TargetRole, CandidateIntake, ExtractResult, RiskResult } from "@/types/pipeline"
+import type { TargetRole } from "@/types/pipeline"
 
 const DEMAND_COLOR: Record<string, string> = {
   high: "bg-green-100 text-green-800",
@@ -34,7 +35,9 @@ function RoleCard({
     >
       <div className="flex items-start justify-between gap-2">
         <span className="font-semibold text-slate-900">{role.title}</span>
-        <Badge className={DEMAND_COLOR[role.market_demand]}>{role.market_demand} demand</Badge>
+        <Badge className={DEMAND_COLOR[role.market_demand] ?? "bg-gray-100 text-gray-800"}>
+          {role.market_demand} demand
+        </Badge>
       </div>
 
       <div className="mt-2 space-y-1">
@@ -58,28 +61,49 @@ function RoleCard({
 
 export function RolesDisplay() {
   const router = useRouter()
-  const [match, setMatch] = useState<MatchResult | null>(null)
+  const [roles, setRoles] = useState<TargetRole[] | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
-      const stored = sessionStorage.getItem("pipeline_match")
-      if (stored) { setMatch(JSON.parse(stored)); setLoading(false); return }
+      try {
+        const supabase = createClient()
 
-      const extract: ExtractResult = JSON.parse(sessionStorage.getItem("pipeline_extract") ?? "{}")
-      const risk: RiskResult = JSON.parse(sessionStorage.getItem("pipeline_risk") ?? "{}")
-      const intake: CandidateIntake = JSON.parse(sessionStorage.getItem("pipeline_intake") ?? "{}")
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        console.log("[RolesDisplay] user:", user?.id, userError?.message)
+        if (!user) { setError("Not signed in. Please sign in and try again."); setLoading(false); return }
 
-      const res = await fetch("/api/pipeline/match", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intake, extract, risk }),
-      })
-      const data: MatchResult = await res.json()
-      sessionStorage.setItem("pipeline_match", JSON.stringify(data))
-      setMatch(data)
-      setLoading(false)
+        const { data: candidate, error: candidateError } = await supabase
+          .from("candidates")
+          .select("id")
+          .eq("profile_id", user.id)
+          .single()
+        console.log("[RolesDisplay] candidate:", candidate, candidateError?.message)
+        if (!candidate) { setError("No candidate profile found. Please complete the intake form."); setLoading(false); return }
+
+        const { data: roleMatch, error: matchError } = await supabase
+          .from("role_matches")
+          .select("target_roles")
+          .eq("candidate_id", candidate.id)
+          .single()
+        console.log("[RolesDisplay] role_matches row:", JSON.stringify(roleMatch))
+        console.log("[RolesDisplay] role_matches error:", matchError?.message)
+
+        if (matchError || !roleMatch?.target_roles) {
+          setError("No role matches found yet. Return to the intake form and complete the analysis.")
+          setLoading(false)
+          return
+        }
+
+        setRoles(roleMatch.target_roles)
+      } catch (err: any) {
+        console.error("[RolesDisplay] unexpected error:", err)
+        setError(err?.message ?? "Something went wrong loading your roles.")
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [])
@@ -90,14 +114,33 @@ export function RolesDisplay() {
     router.push("/learning")
   }
 
-  if (loading) return <p className="text-muted-foreground animate-pulse">Finding your fastest path to reemployment…</p>
-  if (!match) return null
+  if (loading) return <p className="text-muted-foreground animate-pulse">Loading your target roles…</p>
 
-  if (!match || !match.target_roles || match.target_roles.length === 0) {
+  if (error) {
     return (
-      <div style={{textAlign:'center', padding:'40px', color:'#6b7280'}}>
-        <p>Finding your best role matches...</p>
-        <p style={{fontSize:'13px', marginTop:'8px'}}>Complete the full analysis to see your target roles.</p>
+      <div style={{ padding: "32px", backgroundColor: "#fef2f2", borderRadius: "12px", border: "1px solid #fecaca" }}>
+        <p style={{ color: "#dc2626", fontWeight: 600, marginBottom: "8px" }}>Could not load roles</p>
+        <p style={{ color: "#6b7280", fontSize: "14px" }}>{error}</p>
+        <button
+          onClick={() => router.push("/intake")}
+          style={{ marginTop: "16px", padding: "10px 20px", backgroundColor: "#1a3a6b", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}
+        >
+          ← Back to intake
+        </button>
+      </div>
+    )
+  }
+
+  if (!roles || roles.length === 0) {
+    return (
+      <div style={{ padding: "32px", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0", textAlign: "center" }}>
+        <p style={{ color: "#6b7280" }}>No roles found. Please complete the full analysis first.</p>
+        <button
+          onClick={() => router.push("/intake")}
+          style={{ marginTop: "16px", padding: "10px 20px", backgroundColor: "#1a3a6b", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}
+        >
+          ← Back to intake
+        </button>
       </div>
     )
   }
@@ -109,7 +152,7 @@ export function RolesDisplay() {
           <CardTitle className="text-base">Your Best-Fit Roles</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {(match.target_roles || []).map((role) => (
+          {roles.map((role) => (
             <RoleCard
               key={role.title}
               role={role}
@@ -121,9 +164,7 @@ export function RolesDisplay() {
       </Card>
 
       <Button className="w-full" disabled={!selected} onClick={handleNext}>
-        {selected
-          ? `Build my gap analysis for "${selected}" →`
-          : "Select a role to continue"}
+        {selected ? `Build my gap analysis for "${selected}" →` : "Select a role to continue"}
       </Button>
     </div>
   )
