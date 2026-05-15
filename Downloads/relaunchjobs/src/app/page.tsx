@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Playfair_Display, Outfit, DM_Mono } from 'next/font/google'
+import { LangToggle } from '@/components/landing/LangToggle'
 
 const playfair = Playfair_Display({ subsets: ['latin'] })
 const outfit = Outfit({ subsets: ['latin'] })
@@ -79,6 +80,7 @@ export default function LandingPage() {
 
         {/* Nav buttons */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <LangToggle />
           <Link
             href="/login"
             style={{

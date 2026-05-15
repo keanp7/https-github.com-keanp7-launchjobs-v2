@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLang } from '@/contexts/LangContext'
 
 export default function AnalysisPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const { t } = useLang()
   const [loading, setLoading] = useState(true)
   const [analysis, setAnalysis] = useState<any>(null)
 
@@ -16,7 +17,6 @@ export default function AnalysisPage() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { setLoading(false); return }
-        console.log('User id:', user.id)
 
         const { data: candidate } = await supabase
           .from('candidates')
@@ -24,7 +24,6 @@ export default function AnalysisPage() {
           .eq('profile_id', user.id)
           .single()
 
-        console.log('Candidate:', candidate)
         if (!candidate) { setLoading(false); return }
 
         const { data: analysis, error } = await supabase
@@ -35,9 +34,7 @@ export default function AnalysisPage() {
           .limit(1)
           .single()
 
-        console.log('Analysis:', analysis)
-        console.log('Analysis error:', error)
-
+        console.log('Analysis:', analysis, 'error:', error)
         if (analysis) setAnalysis(analysis)
       } catch (error) {
         console.error('Fetch error:', error)
@@ -50,219 +47,170 @@ export default function AnalysisPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
-        <h2 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display' }}>RelaunchJobs</h2>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c9952a] mb-4"></div>
-        <p className="text-[#6b7280]">Preparing your analysis...</p>
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div style={{ width: '36px', height: '36px', border: '3px solid #e5e7eb', borderTop: '3px solid #1a3a6b', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ color: '#6b7280', fontSize: '14px' }}>{t('analysis.loading')}</p>
+        <style>{`@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }`}</style>
       </div>
     )
   }
 
   if (!analysis) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
-        <p className="text-xl text-[#6b7280]">No analysis found.</p>
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#6b7280', fontSize: '16px' }}>{t('analysis.noData')}</p>
       </div>
     )
   }
 
-  const safeSkills = analysis.safe_skills || []
-  const hybridSkills = analysis.hybrid_skills || []
+  const safeSkills   = analysis.safe_skills   || []
+  const hybridSkills = analysis.hybrid_skills  || []
   const atRiskSkills = analysis.at_risk_skills || []
-  const hiddenStrengths = analysis.hidden_strengths || []
 
   return (
-    <div className="min-h-screen bg-white" style={{ padding: '48px 40px' }}>
+    <div style={{ padding: '0' }}>
       <style dangerouslySetInnerHTML={{__html: `
-        @media (max-width: 640px) {
-          .page-wrapper { padding: 24px 16px !important; }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
       `}} />
-      <div className="page-wrapper" style={{ maxWidth: '720px', margin: '0 auto' }}>
-        {/* Section 1 - Headline */}
-        <section>
-          <h1 style={{ fontFamily: 'Playfair Display', fontSize: '36px', margin: '0 0 8px 0' }}>
-            Here's what you actually have.
-          </h1>
-          <p style={{ color: '#6b7280', margin: 0 }}>
-            Your experience translated into language the market understands.
-          </p>
-        </section>
 
-        {/* Section 2 - Stats row */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ backgroundColor: '#e8f5ef', color: '#1a6b4a', borderRadius: '20px', padding: '6px 16px', fontSize: '13px' }}>
-              {safeSkills.length} safe skills
-            </div>
-            <div style={{ backgroundColor: '#ede9fe', color: '#7c3aed', borderRadius: '20px', padding: '6px 16px', fontSize: '13px' }}>
-              {hybridSkills.length} hybrid skills
-            </div>
-            <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '20px', padding: '6px 16px', fontSize: '13px' }}>
-              {atRiskSkills.length} at risk
-            </div>
-          </div>
-        </section>
+      {/* Headline */}
+      <section style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '34px', fontWeight: 700, color: '#0f172a', margin: '0 0 8px 0', lineHeight: 1.2 }}>
+          {t('analysis.title')}
+        </h1>
+        <p style={{ color: '#6b7280', margin: 0, fontSize: '15px' }}>
+          {t('analysis.subtitle')}
+        </p>
+      </section>
 
-        {/* Section 3 - Safe skills */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <h3 style={{ color: '#1a6b4a', fontWeight: 700, fontSize: '14px', margin: '0 0 4px 0' }}>✓ Safe from AI</h3>
-          <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>
-            These skills require human judgment — AI cannot replace them
-          </p>
-          {safeSkills.length > 0 ? (
-            safeSkills.map((skill: any, i: number) => (
-              <div
-                key={i}
-                style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e4e2da',
-                  borderRadius: '12px',
-                  borderLeft: '3px solid #1a6b4a',
-                  padding: '14px 16px',
-                  marginBottom: '8px',
-                  animation: 'fadeIn 0.5s ease forwards',
-                  animationDelay: `${i * 100}ms`,
-                  opacity: 0
-                }}
-              >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
-                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
-              </div>
-            ))
-          ) : (
-            <p style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '14px' }}>
-              Risk scoring in progress...
-            </p>
-          )}
-        </section>
+      {/* Stats row */}
+      <section style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '32px', paddingBottom: '32px', borderBottom: '1px solid #f0ede6' }}>
+        <Pill bg="#e8f5ef" color="#1a6b4a">{t('analysis.safeLabel', { n: safeSkills.length })}</Pill>
+        <Pill bg="#ede9fe" color="#7c3aed">{t('analysis.hybridLabel', { n: hybridSkills.length })}</Pill>
+        <Pill bg="#fee2e2" color="#dc2626">{t('analysis.riskLabel', { n: atRiskSkills.length })}</Pill>
+      </section>
 
-        {/* Section 4 - Hybrid skills */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <h3 style={{ color: '#7c3aed', fontWeight: 700, fontSize: '14px', margin: '0 0 4px 0' }}>⚡ More valuable with AI</h3>
-          <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>
-            These skills become stronger when paired with AI tools
-          </p>
-          {hybridSkills.length > 0 ? (
-            hybridSkills.map((skill: any, i: number) => (
-              <div
-                key={i}
-                style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e4e2da',
-                  borderRadius: '12px',
-                  borderLeft: '3px solid #7c3aed',
-                  padding: '14px 16px',
-                  marginBottom: '8px',
-                  animation: 'fadeIn 0.5s ease forwards',
-                  animationDelay: `${i * 100}ms`,
-                  opacity: 0
-                }}
-              >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
-                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
-                {skill.ai_tool_pairing && (
-                  <div style={{ color: '#7c3aed', fontSize: '12px', marginTop: '4px', fontWeight: 500 }}>
-                    Pairs with: {skill.ai_tool_pairing}
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <p style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '14px' }}>
-              Risk scoring in progress...
-            </p>
-          )}
-        </section>
+      {/* Safe skills */}
+      <Section>
+        <SectionTitle color="#1a6b4a">{t('analysis.safeTitle')}</SectionTitle>
+        <SectionSubtitle>{t('analysis.safeSubtitle')}</SectionSubtitle>
+        {safeSkills.length > 0
+          ? safeSkills.map((skill: any, i: number) => (
+            <SkillCard key={i} delay={i} accent="#1a6b4a">
+              <strong style={{ color: '#0d0d0d' }}>{skill.skill}</strong>
+              <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
+            </SkillCard>
+          ))
+          : <InProgress>{t('analysis.inProgress')}</InProgress>
+        }
+      </Section>
 
-        {/* Section 5 - At risk skills */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <h3 style={{ color: '#dc2626', fontWeight: 700, fontSize: '14px', margin: '0 0 4px 0' }}>⚠ Being automated</h3>
-          <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>
-            Be honest — these are being replaced
-          </p>
-          {atRiskSkills.length > 0 ? (
-            atRiskSkills.map((skill: any, i: number) => (
-              <div
-                key={i}
-                style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e4e2da',
-                  borderRadius: '12px',
-                  borderLeft: '3px solid #dc2626',
-                  padding: '14px 16px',
-                  marginBottom: '8px',
-                  animation: 'fadeIn 0.5s ease forwards',
-                  animationDelay: `${i * 100}ms`,
-                  opacity: 0
-                }}
-              >
-                <div style={{ fontWeight: 'bold', color: '#0d0d0d' }}>{skill.skill}</div>
-                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
-              </div>
-            ))
-          ) : (
-            <p style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '14px' }}>
-              Risk scoring in progress...
-            </p>
-          )}
-          <p style={{ color: '#6b7280', fontStyle: 'italic', marginTop: '16px' }}>
-            But notice how few these are compared to what you have.
-          </p>
-        </section>
+      {/* Hybrid skills */}
+      <Section>
+        <SectionTitle color="#7c3aed">{t('analysis.hybridTitle')}</SectionTitle>
+        <SectionSubtitle>{t('analysis.hybridSubtitle')}</SectionSubtitle>
+        {hybridSkills.length > 0
+          ? hybridSkills.map((skill: any, i: number) => (
+            <SkillCard key={i} delay={i} accent="#7c3aed">
+              <strong style={{ color: '#0d0d0d' }}>{skill.skill}</strong>
+              <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
+              {skill.ai_tool_pairing && (
+                <div style={{ color: '#7c3aed', fontSize: '12px', marginTop: '4px', fontWeight: 500 }}>
+                  {t('analysis.pairsWith')} {skill.ai_tool_pairing}
+                </div>
+              )}
+            </SkillCard>
+          ))
+          : <InProgress>{t('analysis.inProgress')}</InProgress>
+        }
+      </Section>
 
-        {/* Section 6 - Hidden strengths */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <h3 style={{ color: '#c9952a', fontWeight: 700, fontSize: '14px', marginBottom: '16px', marginTop: 0 }}>
-            🔍 What you didn't know you had
-          </h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {analysis.hidden_strengths?.map((item: any, i: number) => (
-              <span key={i} style={{
-                background: '#fdf3dc',
-                color: '#c9952a',
-                border: '1px solid rgba(201,149,42,0.3)',
-                borderRadius: '20px',
-                padding: '4px 14px',
-                fontSize: '12px',
-                margin: '4px',
-                display: 'inline-block'
-              }}>
-                {typeof item === 'string' ? item : item.strength || item.inferred_from || JSON.stringify(item)}
-              </span>
-            ))}
-          </div>
-        </section>
+      {/* At-risk skills */}
+      <Section>
+        <SectionTitle color="#dc2626">{t('analysis.riskTitle')}</SectionTitle>
+        <SectionSubtitle>{t('analysis.riskSubtitle')}</SectionSubtitle>
+        {atRiskSkills.length > 0
+          ? atRiskSkills.map((skill: any, i: number) => (
+            <SkillCard key={i} delay={i} accent="#dc2626">
+              <strong style={{ color: '#0d0d0d' }}>{skill.skill}</strong>
+              <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>{skill.reason}</div>
+            </SkillCard>
+          ))
+          : <InProgress>{t('analysis.inProgress')}</InProgress>
+        }
+        <p style={{ color: '#6b7280', fontStyle: 'italic', marginTop: '16px', fontSize: '14px' }}>
+          {t('analysis.riskFootnote')}
+        </p>
+      </Section>
 
-        {/* Section 7 - CTA button */}
-        <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '32px', marginTop: '32px' }}>
-          <button
-            onClick={() => router.push('/roles')}
-            style={{
-              width: '100%',
-              backgroundColor: '#c9952a',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '16px',
-              fontSize: '15px',
-              fontWeight: 700,
-              marginTop: '40px',
-              cursor: 'pointer'
-            }}
-          >
-            See your target roles →
-          </button>
-          <p style={{ color: '#6b7280', fontSize: '12px', textAlign: 'center', marginTop: '12px' }}>
-            We found 3–5 roles you are already qualified for
-          </p>
-        </section>
+      {/* Hidden strengths */}
+      <Section>
+        <SectionTitle color="#c9952a">{t('analysis.hiddenTitle')}</SectionTitle>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+          {(analysis.hidden_strengths || []).map((item: any, i: number) => (
+            <span key={i} style={{ background: '#fdf3dc', color: '#c9952a', border: '1px solid rgba(201,149,42,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '12px' }}>
+              {typeof item === 'string' ? item : item.strength || item.inferred_from || JSON.stringify(item)}
+            </span>
+          ))}
+        </div>
+      </Section>
 
-      </div>
+      {/* CTA */}
+      <Section>
+        <button
+          onClick={() => router.push('/roles')}
+          style={{ width: '100%', background: '#c9952a', color: 'white', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', marginTop: '8px' }}
+          onMouseOver={e => (e.currentTarget.style.background = '#b8841f')}
+          onMouseOut={e => (e.currentTarget.style.background = '#c9952a')}
+        >
+          {t('analysis.cta')}
+        </button>
+        <p style={{ color: '#6b7280', fontSize: '12px', textAlign: 'center', marginTop: '10px' }}>
+          {t('analysis.ctaNote')}
+        </p>
+      </Section>
     </div>
   )
+}
+
+// ── Small helpers ─────────────────────────────────────────────────────────────
+function Pill({ bg, color, children }: { bg: string; color: string; children: React.ReactNode }) {
+  return (
+    <span style={{ backgroundColor: bg, color, borderRadius: '20px', padding: '6px 16px', fontSize: '13px', fontWeight: 500 }}>
+      {children}
+    </span>
+  )
+}
+
+function Section({ children }: { children: React.ReactNode }) {
+  return (
+    <section style={{ borderTop: '1px solid #f0ede6', paddingTop: '28px', marginTop: '28px' }}>
+      {children}
+    </section>
+  )
+}
+
+function SectionTitle({ color, children }: { color: string; children: React.ReactNode }) {
+  return <h3 style={{ color, fontWeight: 700, fontSize: '14px', margin: '0 0 4px 0' }}>{children}</h3>
+}
+
+function SectionSubtitle({ children }: { children: React.ReactNode }) {
+  return <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '14px', marginTop: 0 }}>{children}</p>
+}
+
+function SkillCard({ delay, accent, children }: { delay: number; accent: string; children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: 'white', border: '1px solid #e4e2da', borderRadius: '12px',
+      borderLeft: `3px solid ${accent}`, padding: '14px 16px', marginBottom: '8px',
+      animation: 'fadeIn 0.5s ease forwards', animationDelay: `${delay * 80}ms`, opacity: 0,
+    }}>
+      {children}
+    </div>
+  )
+}
+
+function InProgress({ children }: { children: React.ReactNode }) {
+  return <p style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '14px' }}>{children}</p>
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "@/components/ui/sonner"
+import { LangProvider } from "@/contexts/LangContext"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
@@ -42,8 +43,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.className} min-h-screen antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          {children}
-          <Toaster richColors position="top-right" />
+          <LangProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </LangProvider>
         </ThemeProvider>
       </body>
     </html>

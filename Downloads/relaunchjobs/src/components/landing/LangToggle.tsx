@@ -1,31 +1,35 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-
-type Lang = "en" | "fr" | "ht"
-
-const LABELS: Record<Lang, string> = {
-  en: "EN",
-  fr: "FR",
-  ht: "HT",
-}
+import { useLang } from "@/contexts/LangContext"
+import type { Lang } from "@/lib/i18n"
+import { LANG_LABELS } from "@/lib/i18n"
 
 export function LangToggle() {
-  const [lang, setLang] = useState<Lang>("en")
+  const { lang, setLang } = useLang()
+  const langs = Object.keys(LANG_LABELS) as Lang[]
 
   return (
-    <div className="flex gap-1">
-      {(Object.keys(LABELS) as Lang[]).map((l) => (
-        <Button
+    <div style={{ display: "flex", gap: "2px" }}>
+      {langs.map((l) => (
+        <button
           key={l}
-          variant={lang === l ? "default" : "ghost"}
-          size="sm"
-          className="px-2 py-1 text-xs"
           onClick={() => setLang(l)}
+          style={{
+            padding: "4px 8px",
+            fontSize: "11px",
+            fontWeight: lang === l ? 700 : 400,
+            color: lang === l ? "#1a3a6b" : "#6b7280",
+            background: lang === l ? "#e8eef8" : "transparent",
+            border: "1px solid",
+            borderColor: lang === l ? "#1a3a6b" : "transparent",
+            borderRadius: "4px",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            letterSpacing: "0.05em",
+          }}
         >
-          {LABELS[l]}
-        </Button>
+          {LANG_LABELS[l]}
+        </button>
       ))}
     </div>
   )

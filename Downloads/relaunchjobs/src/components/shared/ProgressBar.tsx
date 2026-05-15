@@ -1,29 +1,62 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Progress } from "@/components/ui/progress"
+import { LangToggle } from "@/components/landing/LangToggle"
+import { createClient } from "@/lib/supabase/client"
 
-const STEPS: Record<string, number> = {
-  "/intake": 20,
-  "/analysis": 40,
-  "/roles": 60,
-  "/learning": 80,
-  "/profile": 100,
+const STEPS: Record<string, { pct: number; label: string }> = {
+  "/intake":   { pct: 20,  label: "Intake" },
+  "/analysis": { pct: 40,  label: "Analysis" },
+  "/roles":    { pct: 60,  label: "Roles" },
+  "/learning": { pct: 80,  label: "Learning" },
+  "/profile":  { pct: 100, label: "Profile" },
 }
 
 export function ProgressBar() {
   const pathname = usePathname()
-  const progress = STEPS[pathname] ?? 0
+  const router   = useRouter()
+  const step     = STEPS[pathname]
+  const progress = step?.pct ?? 0
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
+  }
 
   return (
-    <div className="border-b bg-white px-4 py-3">
-      <div className="mx-auto max-w-3xl space-y-1">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Career Relaunch Pipeline</span>
-          <span>{progress}%</span>
+    <header style={{ borderBottom: "1px solid #e5e7eb", background: "white", position: "sticky", top: 0, zIndex: 50 }}>
+      {/* Top row: brand + lang + sign out */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 20px", maxWidth: "768px", margin: "0 auto" }}>
+        <span
+          style={{ fontFamily: "'Playfair Display', serif", fontSize: "17px", fontWeight: 700, color: "#1a3a6b", cursor: "pointer" }}
+          onClick={() => router.push("/")}
+        >
+          RelaunchJobs
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <LangToggle />
+          <button
+            onClick={handleSignOut}
+            style={{ fontSize: "12px", color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}
+          >
+            Sign out
+          </button>
         </div>
-        <Progress value={progress} className="h-1.5" />
       </div>
-    </div>
+
+      {/* Progress row */}
+      {progress > 0 && (
+        <div style={{ padding: "6px 20px 10px", maxWidth: "768px", margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "4px" }}>
+            <span>Career Relaunch Pipeline</span>
+            <span>{progress}%</span>
+          </div>
+          <Progress value={progress} className="h-1.5" />
+        </div>
+      )}
+    </header>
   )
 }
