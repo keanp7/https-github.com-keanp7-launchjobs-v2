@@ -24,7 +24,7 @@ export default function SignupPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${location.origin}/callback` },
+      options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? location.origin}/callback` },
     })
     if (error) { toast.error(error.message); setLoading(false); return }
     // If email confirmation is disabled, session exists immediately
@@ -41,7 +41,7 @@ export default function SignupPage() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/callback` },
+      options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? location.origin}/callback` },
     })
     if (error) { toast.error(error.message); setGoogleLoading(false) }
   }
