@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, throwOnDbError } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
 
 export async function POST(request: NextRequest) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) throwOnDbError(error, "extract/skills_analyses upsert")
 
     return NextResponse.json({ success: true, data: parsed })
   } catch (error: any) {

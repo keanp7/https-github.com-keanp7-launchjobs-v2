@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, throwOnDbError } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
 
 export async function POST(request: NextRequest) {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", existing.id)
 
-    if (error) throw error
+    if (error) throwOnDbError(error, "risk/skills_analyses update")
 
     return NextResponse.json({ success: true, data: parsed })
   } catch (error: any) {

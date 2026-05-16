@@ -134,7 +134,17 @@ function IntakeForm() {
         .select('id')
         .single()
 
-      if (candidateError) throw new Error(`Candidate insert failed: ${candidateError.message}`)
+      if (candidateError) {
+        const dbCode = (candidateError as any).code
+        if (dbCode === '23502') {
+          const col = candidateError.message.match(/column "([^"]+)"/)?.[1] ?? 'a required field'
+          throw new Error(`Missing required value: "${col}". Please check all steps are filled in and try again.`)
+        }
+        if (dbCode === '42P10') {
+          throw new Error(`Database constraint error (ON CONFLICT). Please contact support.`)
+        }
+        throw new Error(`Could not save your information: ${candidateError.message}`)
+      }
       if (!candidate?.id) throw new Error('Candidate created but no ID returned')
 
       // Run pipeline steps
