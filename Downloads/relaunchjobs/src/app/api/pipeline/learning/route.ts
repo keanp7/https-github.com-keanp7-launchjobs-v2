@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       weeks: parsed.weeks,
       final_proof: parsed.final_proof,
       interview_angle: parsed.interview_angle,
-    })
+    }, { onConflict: "candidate_id" })
     .select()
     .single()
 

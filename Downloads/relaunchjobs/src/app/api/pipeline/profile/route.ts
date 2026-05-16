@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       proof_points: parsed.proof_points,
       employer_pitch: parsed.employer_pitch,
       open_to: parsed.open_to,
-    })
+    }, { onConflict: "candidate_id" })
     .select()
     .single()
 

@@ -35,9 +35,12 @@ export async function POST(request: NextRequest) {
     console.log('RAW RISK RESPONSE:', response.content[0])
     const raw = response.content[0].type === "text" ? response.content[0].text : ""
     const clean = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
-    const parsed = JSON.parse(clean)
-    console.log('PARSED RISK:', JSON.stringify(parsed, null, 2))
-    console.log('SAFE SKILLS:', parsed?.safe_skills)
+    let parsed: any
+    try {
+      parsed = JSON.parse(clean)
+    } catch {
+      throw new Error(`AI returned invalid JSON: ${clean.substring(0, 200)}`)
+    }
 
     const { error } = await supabase
       .from("skills_analyses")

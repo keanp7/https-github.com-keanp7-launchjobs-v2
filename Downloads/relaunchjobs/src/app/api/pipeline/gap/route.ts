@@ -42,7 +42,12 @@ export async function POST(request: NextRequest) {
 
     const raw = response.content[0].type === "text" ? response.content[0].text : ""
     const clean = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
-    const parsed = JSON.parse(clean)
+    let parsed: any
+    try {
+      parsed = JSON.parse(clean)
+    } catch {
+      throw new Error(`AI returned invalid JSON: ${clean.substring(0, 200)}`)
+    }
 
     const { error } = await supabase
       .from("gap_analyses")

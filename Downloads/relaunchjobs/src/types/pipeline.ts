@@ -120,6 +120,7 @@ export interface LearningResult {
   weeks: LearningWeek[]
   final_proof: string
   interview_angle: string
+  is_fallback?: boolean
 }
 
 // ─── Step 6: Profile ──────────────────────────────────────────────────────────
@@ -135,6 +136,7 @@ export interface ProfileResult {
   proof_points: ProofPoint[]
   employer_pitch: string
   open_to: string[]
+  is_fallback?: boolean
 }
 
 // ─── Full Pipeline State ──────────────────────────────────────────────────────
