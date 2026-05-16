@@ -66,17 +66,24 @@ function IntakeForm() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
+
+      // Include all mapped fields so partial upserts don't violate NOT NULL
+      // constraints on old_job_title, years_experience, industry, etc.
+      const row: Record<string, any> = {
+        id: user.id,
+        onboarding_started: true,
+        intake_step: nextStep,
+        intake_answers: answers,
+      }
+      if (answers.jobTitle)  row.old_job_title        = answers.jobTitle
+      if (answers.yearsExp)  row.years_experience     = parseInt(answers.yearsExp) || 1
+      if (answers.industry)  row.industry             = answers.industry
+      if (answers.reason)    row.displacement_reason  = answers.reason
+      if (answers.context)   row.extra_context        = answers.context
+
       await supabase
         .from('candidates')
-        .upsert(
-          {
-            id: user.id,
-            onboarding_started: true,
-            intake_step: nextStep,
-            intake_answers: answers,
-          },
-          { onConflict: 'id' }
-        )
+        .upsert(row, { onConflict: 'id' })
     } catch (e) {
       console.error('Save progress error:', e)
     } finally {

@@ -12,20 +12,8 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return NextResponse.redirect(`${origin}/login?error=no_user`)
 
-      // Ensure a candidate row exists for this user (new sign-ups)
-      await supabase
-        .from("candidates")
-        .upsert(
-          {
-            id: user.id,
-            onboarding_started: false,
-            onboarding_completed: false,
-            intake_step: 1,
-          },
-          { onConflict: "id", ignoreDuplicates: true }
-        )
-
-      // Fetch onboarding state
+      // Fetch onboarding state (do NOT upsert here — old_job_title is NOT NULL
+      // and we don't know it yet; the row is created in handleSubmit)
       const { data: candidate } = await supabase
         .from("candidates")
         .select("onboarding_started, onboarding_completed, intake_step")
