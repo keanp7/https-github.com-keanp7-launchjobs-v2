@@ -30,7 +30,7 @@ export function ProfileCard() {
         const { data: candidate, error: candidateError } = await supabase
           .from("candidates")
           .select("id")
-          .eq("profile_id", user.id)
+          .eq("id", user.id)
           .single()
         console.log("[ProfileCard] candidate:", candidate?.id, candidateError?.message)
         if (!candidate) { setError("No candidate profile found. Please complete the intake form."); setLoading(false); return }

@@ -17,19 +17,19 @@ export async function GET(request: Request) {
         .from("candidates")
         .upsert(
           {
-            profile_id: user.id,
+            id: user.id,
             onboarding_started: false,
             onboarding_completed: false,
             intake_step: 1,
           },
-          { onConflict: "profile_id", ignoreDuplicates: true }
+          { onConflict: "id", ignoreDuplicates: true }
         )
 
       // Fetch onboarding state
       const { data: candidate } = await supabase
         .from("candidates")
         .select("onboarding_started, onboarding_completed, intake_step")
-        .eq("profile_id", user.id)
+        .eq("id", user.id)
         .single()
 
       // New user or never started → beginning of intake

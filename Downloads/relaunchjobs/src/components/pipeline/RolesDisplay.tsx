@@ -78,7 +78,7 @@ export function RolesDisplay() {
         const { data: candidate, error: candidateError } = await supabase
           .from("candidates")
           .select("id")
-          .eq("profile_id", user.id)
+          .eq("id", user.id)
           .single()
         console.log("[RolesDisplay] candidate:", candidate, candidateError?.message)
         if (!candidate) { setError("No candidate profile found. Please complete the intake form."); setLoading(false); return }

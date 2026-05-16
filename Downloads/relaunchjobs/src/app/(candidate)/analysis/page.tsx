@@ -21,7 +21,7 @@ export default function AnalysisPage() {
         const { data: candidate } = await supabase
           .from('candidates')
           .select('id')
-          .eq('profile_id', user.id)
+          .eq('id', user.id)
           .single()
 
         if (!candidate) { setLoading(false); return }

@@ -31,7 +31,7 @@ export function LearningPath() {
         const { data: candidate, error: candidateError } = await supabase
           .from("candidates")
           .select("id, old_job_title, years_experience, industry, displacement_reason, extra_context")
-          .eq("profile_id", user.id)
+          .eq("id", user.id)
           .single()
         console.log("[LearningPath] candidate:", candidate?.id, candidateError?.message)
         if (!candidate) { setError("No candidate profile found. Please complete the intake form."); setLoading(false); return }

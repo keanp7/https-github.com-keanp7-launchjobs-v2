@@ -35,7 +35,7 @@ function IntakeForm() {
       const { data: candidate } = await supabase
         .from('candidates')
         .select('intake_step, intake_answers, onboarding_completed')
-        .eq('profile_id', user.id)
+        .eq('id', user.id)
         .single()
 
       if (!candidate) return
@@ -70,12 +70,12 @@ function IntakeForm() {
         .from('candidates')
         .upsert(
           {
-            profile_id: user.id,
+            id: user.id,
             onboarding_started: true,
             intake_step: nextStep,
             intake_answers: answers,
           },
-          { onConflict: 'profile_id' }
+          { onConflict: 'id' }
         )
     } catch (e) {
       console.error('Save progress error:', e)
@@ -111,7 +111,7 @@ function IntakeForm() {
         .from('candidates')
         .upsert(
           {
-            profile_id: user.id,
+            id: user.id,
             old_job_title: formData.jobTitle,
             years_experience: parseInt(formData.yearsExp) || 1,
             industry: formData.industry,
@@ -122,7 +122,7 @@ function IntakeForm() {
             intake_step: 5,
             intake_answers: formData,
           },
-          { onConflict: 'profile_id' }
+          { onConflict: 'id' }
         )
         .select('id')
         .single()
@@ -173,7 +173,7 @@ function IntakeForm() {
       await supabase
         .from('candidates')
         .update({ onboarding_completed: true })
-        .eq('profile_id', user.id)
+        .eq('id', user.id)
 
       clearInterval(interval)
       router.push('/analysis')
