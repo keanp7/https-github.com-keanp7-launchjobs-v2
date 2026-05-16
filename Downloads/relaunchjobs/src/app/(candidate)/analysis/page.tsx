@@ -57,8 +57,14 @@ export default function AnalysisPage() {
 
   if (!analysis) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#6b7280', fontSize: '16px' }}>{t('analysis.noData')}</p>
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
+        <p style={{ color: '#6b7280', fontSize: '16px', textAlign: 'center' }}>{t('analysis.noData')}</p>
+        <button
+          onClick={() => router.push('/intake')}
+          style={{ padding: '12px 28px', background: '#1a3a6b', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
+        >
+          Start your analysis
+        </button>
       </div>
     )
   }

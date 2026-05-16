@@ -157,6 +157,13 @@ export default function SignupPage() {
             {t("auth.signup.signIn")}
           </Link>
         </p>
+
+        {/* Legal links */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f0f0f0" }}>
+          <Link href="/terms" style={{ fontSize: "11px", color: "#9ca3af", textDecoration: "none" }}>Terms</Link>
+          <Link href="/privacy" style={{ fontSize: "11px", color: "#9ca3af", textDecoration: "none" }}>Privacy</Link>
+          <Link href="/contact" style={{ fontSize: "11px", color: "#9ca3af", textDecoration: "none" }}>Contact</Link>
+        </div>
       </div>
     </div>
   )

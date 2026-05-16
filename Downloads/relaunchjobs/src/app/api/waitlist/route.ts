@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error
 
     await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? "RelaunchJobs <noreply@relaunchjobs.com>",
+      from: process.env.EMAIL_FROM ?? "RelaunchJobs <noreply@relaunchjobs.app>",
       to: email,
       subject: "You're on the RelaunchJobs waitlist",
       html: `

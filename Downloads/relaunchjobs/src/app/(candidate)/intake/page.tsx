@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLang } from '@/contexts/LangContext'
+import { toast } from 'sonner'
 import './intake.css'
 
 export default function IntakePage() {
@@ -127,7 +128,7 @@ export default function IntakePage() {
       setIsLoading(false)
       setLoadingMessage('')
       console.error("Submit error:", error)
-      alert(`Error: ${error.message || 'Something went wrong. Your answers are saved — please try again.'}`)
+      toast.error(error.message || 'Something went wrong. Your answers are saved — please try again.')
     }
   }
 
@@ -137,7 +138,8 @@ export default function IntakePage() {
       return
     }
 
-    if (currentStep === 1 && formData.jobTitle) {
+    if (currentStep === 1) {
+      if (!formData.jobTitle.trim()) { toast.error('Please enter your job title.'); return }
       setFlashMessage(t('intake.gotIt', { title: formData.jobTitle }))
       setTimeout(() => {
         setFlashMessage('')
@@ -145,6 +147,10 @@ export default function IntakePage() {
       }, 1500)
       return
     }
+
+    if (currentStep === 2 && !formData.yearsExp) { toast.error('Please select your years of experience.'); return }
+    if (currentStep === 3 && !formData.industry.trim()) { toast.error('Please enter your industry.'); return }
+    if (currentStep === 4 && !formData.reason) { toast.error('Please select your displacement reason.'); return }
 
     if (currentStep < 5) {
       setCurrentStep(prev => prev + 1)

@@ -6,9 +6,11 @@ export default function PrivacyPage() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#fff", padding: "60px 5%" }}>
       <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-        <Link href="/" style={{ fontSize: "14px", color: "#1a3a6b", textDecoration: "none", display: "block", marginBottom: "32px" }}>
-          ← Back to RelaunchJobs
-        </Link>
+        <div style={{ display: "flex", gap: "20px", marginBottom: "32px", flexWrap: "wrap" }}>
+          <Link href="/" style={{ fontSize: "14px", color: "#1a3a6b", textDecoration: "none" }}>← Back to RelaunchJobs</Link>
+          <Link href="/terms" style={{ fontSize: "14px", color: "#6b7280", textDecoration: "none" }}>Terms</Link>
+          <Link href="/contact" style={{ fontSize: "14px", color: "#6b7280", textDecoration: "none" }}>Contact</Link>
+        </div>
 
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "36px", color: "#0f172a", marginBottom: "8px" }}>
           Privacy Policy
@@ -43,7 +45,7 @@ export default function PrivacyPage() {
           },
           {
             title: "6. Your Rights",
-            body: "You can request a copy of your data, ask us to delete your account and all associated data, or opt out of any communications at any time. Email support@relaunchjobs.com and we will respond within 48 hours.",
+            body: "You can request a copy of your data, ask us to delete your account and all associated data, or opt out of any communications at any time. Email support@relaunchjobs.app and we will respond within 48 hours.",
           },
           {
             title: "7. Cookies",
@@ -59,7 +61,7 @@ export default function PrivacyPage() {
           },
           {
             title: "10. Contact",
-            body: "For privacy questions or data requests, contact us at support@relaunchjobs.com.",
+            body: "For privacy questions or data requests, contact us at support@relaunchjobs.app.",
           },
         ].map((section) => (
           <div key={section.title} style={{ marginBottom: "32px" }}>

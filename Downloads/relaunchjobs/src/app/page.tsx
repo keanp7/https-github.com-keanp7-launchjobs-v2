@@ -692,6 +692,7 @@ export default function LandingPage() {
             {[
               { label: 'Terms of Service', href: '/terms' },
               { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Contact us', href: '/contact' },
               { label: 'We never sell your data', href: '/privacy' },
             ].map(l => (
               <Link
@@ -710,10 +711,10 @@ export default function LandingPage() {
               Support
             </p>
             <a
-              href="mailto:support@relaunchjobs.com"
+              href="mailto:support@relaunchjobs.app"
               style={{ display: 'block', fontSize: '14px', color: 'var(--royal)', textDecoration: 'none', fontWeight: 600, marginBottom: '8px' }}
             >
-              support@relaunchjobs.com
+              support@relaunchjobs.app
             </a>
             <p style={{ fontSize: '13px', color: '#8a94a6', lineHeight: 1.6 }}>
               We respond within 24 hours.<br />No bots. Just us.
@@ -732,10 +733,11 @@ export default function LandingPage() {
           <p className={mono.className} style={{ fontSize: '12px', color: '#9ca3af' }}>
             © {new Date().getFullYear()} RelaunchJobs. All rights reserved.
           </p>
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
             <Link href="/terms" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>Terms</Link>
             <Link href="/privacy" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>Privacy</Link>
-            <p className={mono.className} style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>Built by JAS, Founder</p>
+            <Link href="/contact" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>Contact</Link>
+            <a href="mailto:support@relaunchjobs.app" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>support@relaunchjobs.app</a>
           </div>
         </div>
       </footer>

@@ -1,0 +1,19 @@
+.intake-wrapper { min-height: 100vh; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+.intake-card { width: 100%; max-width: 560px; background: white; border-radius: 16px; padding: 48px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+.progress-bar-wrap { width: 100%; max-width: 560px; margin-bottom: 32px; }
+.progress-label { font-size: 11px; color: #6b7280; font-family: monospace; letter-spacing: 0.06em; margin-bottom: 8px; }
+.progress-track { width: 100%; height: 4px; background: #e5e7eb; border-radius: 4px; }
+.progress-fill { height: 4px; background: #1a3a6b; border-radius: 4px; transition: width 0.4s ease; }
+.question-label { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; line-height: 1.2; }
+.helper-text { font-size: 13px; color: #6b7280; margin-bottom: 24px; }
+.intake-input { width: 100%; padding: 14px 16px; border: 1.5px solid #e4e2da; border-radius: 10px; font-size: 15px; font-family: sans-serif; outline: none; transition: border-color 0.2s; }
+.intake-input:focus { border-color: #1a3a6b; }
+.intake-textarea { width: 100%; padding: 14px 16px; border: 1.5px solid #e4e2da; border-radius: 10px; font-size: 15px; font-family: sans-serif; outline: none; min-height: 140px; resize: vertical; transition: border-color 0.2s; }
+.intake-textarea:focus { border-color: #1a3a6b; }
+.intake-select { width: 100%; padding: 14px 16px; border: 1.5px solid #e4e2da; border-radius: 10px; font-size: 15px; font-family: sans-serif; outline: none; background: white; cursor: pointer; }
+.btn-next { width: 100%; padding: 14px; background: #c9952a; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 24px; transition: all 0.2s; }
+.btn-next:hover { background: #b8841f; transform: translateY(-1px); }
+.btn-back { background: none; border: none; color: #6b7280; font-size: 13px; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+.gold-banner { background: #fdf3dc; border: 1px solid rgba(201,149,42,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #c9952a; font-weight: 500; margin-bottom: 16px; }
+.flash-msg { font-size: 13px; color: #1a6b4a; text-align: center; margin-top: 8px; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }

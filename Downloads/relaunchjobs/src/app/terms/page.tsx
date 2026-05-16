@@ -6,9 +6,11 @@ export default function TermsPage() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#fff", padding: "60px 5%" }}>
       <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-        <Link href="/" style={{ fontSize: "14px", color: "#1a3a6b", textDecoration: "none", display: "block", marginBottom: "32px" }}>
-          ← Back to RelaunchJobs
-        </Link>
+        <div style={{ display: "flex", gap: "20px", marginBottom: "32px", flexWrap: "wrap" }}>
+          <Link href="/" style={{ fontSize: "14px", color: "#1a3a6b", textDecoration: "none" }}>← Back to RelaunchJobs</Link>
+          <Link href="/privacy" style={{ fontSize: "14px", color: "#6b7280", textDecoration: "none" }}>Privacy</Link>
+          <Link href="/contact" style={{ fontSize: "14px", color: "#6b7280", textDecoration: "none" }}>Contact</Link>
+        </div>
 
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "36px", color: "#0f172a", marginBottom: "8px" }}>
           Terms of Service
@@ -52,7 +54,7 @@ export default function TermsPage() {
           },
           {
             title: "9. Contact",
-            body: "For questions about these Terms, contact us at support@relaunchjobs.com.",
+            body: "For questions about these Terms, contact us at support@relaunchjobs.app.",
           },
         ].map((section) => (
           <div key={section.title} style={{ marginBottom: "32px" }}>

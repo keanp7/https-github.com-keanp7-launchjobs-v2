@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   const { data, error } = await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "RelaunchJobs <noreply@relaunchjobs.com>",
+    from: process.env.EMAIL_FROM ?? "RelaunchJobs <noreply@relaunchjobs.app>",
     to,
     subject,
     html,

@@ -1,12 +1,23 @@
 {
   "name": "RelaunchJobs",
   "short_name": "RelaunchJobs",
-  "description": "AI-Powered Career Transitions",
+  "description": "AI-powered career transitions for displaced workers. Know your value in 30 minutes.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a6b4a",
+  "orientation": "portrait-primary",
+  "background_color": "#0d2147",
+  "theme_color": "#1a3a6b",
+  "categories": ["productivity", "education", "business"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
@@ -18,6 +29,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Get started free",
+      "short_name": "Sign up",
+      "url": "/signup",
+      "description": "Create your free account"
+    },
+    {
+      "name": "Sign in",
+      "short_name": "Sign in",
+      "url": "/login",
+      "description": "Sign in to your account"
     }
   ]
 }
