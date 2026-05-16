@@ -9,7 +9,6 @@ const playfair = Playfair_Display({ subsets: ['latin'] })
 const outfit = Outfit({ subsets: ['latin'] })
 const mono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
-// ── CSS vars available throughout the page ────────────────────────────────────
 const ROOT_VARS = {
   '--royal': '#1a3a6b',
   '--royal-deep': '#0d2147',
@@ -18,6 +17,24 @@ const ROOT_VARS = {
   '--green': '#1a6b4a',
   '--green-bright': '#3ecf8e',
 } as React.CSSProperties
+
+// ── Shared styles ─────────────────────────────────────────────────────────────
+const trustBadgeStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '20px',
+  flexWrap: 'wrap',
+  marginTop: '18px',
+}
+const trustItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '5px',
+  fontSize: '13px',
+  color: '#8fa3c0',
+  letterSpacing: '0.01em',
+}
 
 export default function LandingPage() {
   const [heroEmail, setHeroEmail] = useState('')
@@ -47,120 +64,89 @@ export default function LandingPage() {
       className={outfit.className}
       style={{ ...ROOT_VARS, minHeight: '100vh', backgroundColor: '#ffffff', color: '#111827' }}
     >
-      {/* ── NAVBAR ── white bg, royal blue logo, accessible nav links ──────── */}
+      {/* ── Responsive styles ── */}
+      <style>{`
+        .hero-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .hero-input { padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: white; font-size: 16px; outline: none; flex: 1; min-width: 220px; max-width: 320px; }
+        .hero-input::placeholder { color: rgba(255,255,255,0.45); }
+        .hero-btn { padding: 15px 28px; background: var(--gold); color: white; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 14px rgba(201,149,42,0.4); transition: background 0.15s; flex-shrink: 0; }
+        .hero-btn:hover { background: #b8841f; }
+        .hero-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .cta-input { padding: 16px 22px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: white; font-size: 16px; outline: none; flex: 1; min-width: 220px; max-width: 320px; }
+        .cta-input::placeholder { color: rgba(255,255,255,0.45); }
+        .cta-btn { padding: 16px 32px; background: var(--gold); color: white; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 14px rgba(201,149,42,0.4); transition: background 0.15s; flex-shrink: 0; }
+        .cta-btn:hover { background: #b8841f; }
+        .cta-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .nav-links { display: flex; gap: 12px; align-items: center; }
+        .nav-signin { padding: 9px 18px; border-radius: 8px; border: 1.5px solid var(--royal); color: var(--royal); text-decoration: none; font-weight: 600; font-size: 14px; line-height: 1; transition: background 0.15s, color 0.15s; }
+        .nav-signin:hover { background: var(--royal); color: #fff; }
+        .nav-getstarted { padding: 9px 18px; border-radius: 8px; background: var(--gold); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; line-height: 1; box-shadow: 0 2px 8px rgba(201,149,42,0.3); transition: background 0.15s; }
+        .nav-getstarted:hover { background: #b8841f; }
+        @media (max-width: 540px) {
+          .hero-form { flex-direction: column; align-items: stretch; }
+          .hero-input { max-width: 100%; }
+          .cta-input { max-width: 100%; }
+          .hero-btn, .cta-btn { width: 100%; text-align: center; }
+          .nav-signin { display: none; }
+          .hide-mobile { display: none !important; }
+        }
+      `}</style>
+
+      {/* ── NAVBAR ──────────────────────────────────────────────────────────── */}
       <nav
         style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
+          position: 'sticky', top: 0, zIndex: 50,
           backgroundColor: '#ffffff',
           borderBottom: '1px solid #e2e8f0',
           boxShadow: '0 1px 8px rgba(13,33,71,0.07)',
           padding: '0 5%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          height: '68px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          height: '64px',
         }}
       >
-        {/* Logo */}
         <Link
           href="/"
           className={playfair.className}
-          style={{
-            fontSize: '22px',
-            fontWeight: 700,
-            color: 'var(--royal)',
-            textDecoration: 'none',
-            letterSpacing: '-0.02em',
-          }}
+          style={{ fontSize: '21px', fontWeight: 700, color: 'var(--royal)', textDecoration: 'none', letterSpacing: '-0.02em' }}
         >
           RelaunchJobs
         </Link>
 
-        {/* Nav buttons */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <LangToggle />
-          <Link
-            href="/login"
-            style={{
-              padding: '10px 20px',
-              borderRadius: '8px',
-              border: '1.5px solid var(--royal)',
-              color: 'var(--royal)',
-              textDecoration: 'none',
-              fontWeight: 600,
-              fontSize: '15px',
-              display: 'inline-block',
-              lineHeight: 1,
-              transition: 'background 0.15s, color 0.15s',
-            }}
-            onMouseEnter={e => {
-              ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--royal)'
-              ;(e.currentTarget as HTMLAnchorElement).style.color = '#fff'
-            }}
-            onMouseLeave={e => {
-              ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'
-              ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--royal)'
-            }}
-          >
-            Sign in
-          </Link>
-
-          <Link
-            href="/intake"
-            style={{
-              padding: '10px 22px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--gold)',
-              color: '#fff',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '15px',
-              display: 'inline-block',
-              lineHeight: 1,
-              boxShadow: '0 2px 8px rgba(201,149,42,0.3)',
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={e =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#b8841f')
-            }
-            onMouseLeave={e =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--gold)')
-            }
-          >
-            Get started
-          </Link>
+        <div className="nav-links">
+          <span className="hide-mobile"><LangToggle /></span>
+          <Link href="/login" className="nav-signin">Sign in</Link>
+          <Link href="/signup" className="nav-getstarted">Get started free</Link>
         </div>
       </nav>
 
-      {/* ── HERO ── dark navy bg, gold headline accent ───────────────────────── */}
+      {/* ── HERO ────────────────────────────────────────────────────────────── */}
       <section
         style={{
           backgroundColor: 'var(--royal-deep)',
           color: 'white',
-          padding: '96px 5% 112px',
+          padding: 'clamp(64px, 10vw, 104px) 5% clamp(72px, 11vw, 116px)',
           textAlign: 'center',
         }}
       >
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          {/* Gold accent bar */}
-          <div
-            style={{
-              display: 'inline-block',
-              height: '3px',
-              width: '48px',
-              backgroundColor: 'var(--gold)',
-              borderRadius: '2px',
-              marginBottom: '32px',
-            }}
-          />
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          {/* Eyebrow */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '28px' }}>
+            <div style={{ height: '2px', width: '32px', backgroundColor: 'var(--gold)', borderRadius: '2px' }} />
+            <span
+              className={mono.className}
+              style={{ color: 'var(--gold)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.12em' }}
+            >
+              AI-powered career transition
+            </span>
+            <div style={{ height: '2px', width: '32px', backgroundColor: 'var(--gold)', borderRadius: '2px' }} />
+          </div>
+
           <h1
             className={playfair.className}
             style={{
-              fontSize: 'clamp(38px, 5vw, 68px)',
+              fontSize: 'clamp(36px, 5.5vw, 66px)',
               lineHeight: 1.08,
-              marginBottom: '28px',
+              marginBottom: '24px',
               color: '#ffffff',
               letterSpacing: '-0.02em',
             }}
@@ -168,110 +154,81 @@ export default function LandingPage() {
             Your skills didn&apos;t disappear.{' '}
             <span style={{ color: 'var(--gold-bright)' }}>Your title did.</span>
           </h1>
+
           <p
             style={{
-              fontSize: 'clamp(17px, 2vw, 21px)',
+              fontSize: 'clamp(16px, 2vw, 19px)',
               color: '#c7d2e0',
-              marginBottom: '52px',
-              lineHeight: 1.65,
-              maxWidth: '640px',
-              margin: '0 auto 52px',
+              lineHeight: 1.7,
+              maxWidth: '580px',
+              margin: '0 auto 44px',
             }}
           >
-            AI displaced you. We use AI to show you what you&apos;re actually worth — and hand you
-            the fastest path to your next role.
+            Enter your job title. In 30 minutes, get a clear picture of your transferable skills,
+            the roles you&apos;re already qualified for, and a week-by-week plan to land one.
           </p>
 
           <form
-            onSubmit={e => {
-              e.preventDefault()
-              submitWaitlist(heroEmail, setHeroStatus)
-            }}
-            style={{
-              display: 'flex',
-              gap: '10px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '20px',
-            }}
+            className="hero-form"
+            onSubmit={e => { e.preventDefault(); submitWaitlist(heroEmail, setHeroStatus) }}
           >
             <input
               type="email"
-              placeholder="Enter your email"
+              className="hero-input"
+              placeholder="Enter your work email"
               value={heroEmail}
               onChange={e => setHeroEmail(e.target.value)}
               required
               aria-label="Email address"
-              style={{
-                padding: '15px 20px',
-                borderRadius: '8px',
-                border: '2px solid rgba(255,255,255,0.15)',
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                color: 'white',
-                width: '300px',
-                fontSize: '16px',
-                outline: 'none',
-              }}
             />
-            <button
-              type="submit"
-              style={{
-                padding: '15px 30px',
-                backgroundColor: 'var(--gold)',
-                color: 'white',
-                borderRadius: '8px',
-                border: 'none',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(201,149,42,0.4)',
-              }}
-            >
-              {heroStatus === 'loading' ? 'Submitting…' : 'Start free →'}
+            <button type="submit" className="hero-btn" disabled={heroStatus === 'loading'}>
+              {heroStatus === 'loading' ? 'One sec…' : 'Find my next role →'}
             </button>
           </form>
 
           {heroStatus === 'success' && (
-            <p style={{ color: 'var(--green-bright)', marginBottom: '24px', fontSize: '15px' }}>
-              ✓ You&apos;re on the early access list
+            <p style={{ color: 'var(--green-bright)', fontSize: '14px', marginBottom: '12px' }}>
+              ✓ You&apos;re on the list — we&apos;ll send your access link shortly.
             </p>
           )}
 
+          {/* Trust signals */}
+          <div style={trustBadgeStyle}>
+            <span style={trustItemStyle}><span>✓</span> No resume required</span>
+            <span style={{ ...trustItemStyle, opacity: 0.3 }}>·</span>
+            <span style={trustItemStyle}><span>✓</span> Free to start</span>
+            <span style={{ ...trustItemStyle, opacity: 0.3 }}>·</span>
+            <span style={trustItemStyle}><span>✓</span> We never sell your data</span>
+          </div>
+
+          {/* Stats */}
           <div
             className={mono.className}
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '28px',
-              flexWrap: 'wrap',
-              color: '#8fa3c0',
-              fontSize: '13px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              marginTop: '40px',
+              display: 'flex', justifyContent: 'center', gap: '28px', flexWrap: 'wrap',
+              color: '#8fa3c0', fontSize: '12px',
+              textTransform: 'uppercase', letterSpacing: '0.07em',
+              marginTop: '36px', paddingTop: '32px',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
             }}
           >
-            <span>6,500 workers validated</span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>3 wk avg gap</span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>92% already qualified</span>
+            <span>6,500+ workers validated</span>
+            <span style={{ opacity: 0.35 }}>·</span>
+            <span>Avg. 3-week skill gap</span>
+            <span style={{ opacity: 0.35 }}>·</span>
+            <span>92% already qualified for adj. roles</span>
           </div>
         </div>
       </section>
 
-      {/* ── PAIN SECTION ── white bg, royal blue headline ────────────────────── */}
-      <section style={{ padding: '96px 5%', backgroundColor: '#ffffff' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* ── PAIN SECTION ────────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(64px, 8vw, 96px) 5%', backgroundColor: '#ffffff' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <p
             className={mono.className}
             style={{
-              textAlign: 'center',
-              color: 'var(--gold)',
-              fontSize: '12px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-              marginBottom: '16px',
+              textAlign: 'center', color: 'var(--gold)',
+              fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px',
             }}
           >
             Sound familiar?
@@ -279,11 +236,9 @@ export default function LandingPage() {
           <h2
             className={playfair.className}
             style={{
-              fontSize: 'clamp(30px, 3.5vw, 44px)',
-              textAlign: 'center',
-              color: 'var(--royal)',
-              marginBottom: '56px',
-              letterSpacing: '-0.02em',
+              fontSize: 'clamp(28px, 3.5vw, 42px)',
+              textAlign: 'center', color: 'var(--royal)',
+              marginBottom: '52px', letterSpacing: '-0.02em',
             }}
           >
             The job search is broken for displaced workers.
@@ -292,188 +247,184 @@ export default function LandingPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '20px',
-              marginBottom: '64px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '18px',
+              marginBottom: '56px',
             }}
           >
             {[
-              'Applying to 100+ roles with zero response.',
-              'Feeling like your 10 years of experience is suddenly worthless.',
-              'Not knowing what title to even search for anymore.',
-              'Watching entry-level roles demand 5 years of experience.',
+              { icon: '📭', text: 'Sending 50+ applications and hearing nothing back.' },
+              { icon: '🪞', text: 'Feeling like 10 years of experience became worthless overnight.' },
+              { icon: '🔍', text: 'Not knowing which job titles to even search for anymore.' },
+              { icon: '📋', text: '"Entry-level" roles demanding 5 years of specific experience.' },
             ].map((pain, i) => (
               <div
                 key={i}
                 style={{
-                  padding: '32px',
+                  padding: '28px 24px',
                   backgroundColor: '#f8fafc',
-                  borderRadius: '16px',
+                  borderRadius: '14px',
                   border: '1px solid #e2e8f0',
                 }}
               >
-                <div
-                  style={{
-                    width: '36px',
-                    height: '3px',
-                    backgroundColor: 'var(--gold)',
-                    marginBottom: '20px',
-                    borderRadius: '2px',
-                  }}
-                />
-                <p style={{ fontSize: '17px', lineHeight: 1.65, color: '#4a5568' }}>{pain}</p>
+                <div style={{ fontSize: '24px', marginBottom: '12px' }}>{pain.icon}</div>
+                <p style={{ fontSize: '15px', lineHeight: 1.65, color: '#4a5568', margin: 0 }}>{pain.text}</p>
               </div>
             ))}
           </div>
 
-          {/* Pull quote */}
+          {/* Pivot moment */}
           <div
             style={{
-              backgroundColor: '#fdfbf5',
-              padding: '52px 48px',
+              background: 'linear-gradient(135deg, #f0f4ff 0%, #fdfbf5 100%)',
+              padding: 'clamp(32px, 5vw, 52px) clamp(28px, 5vw, 48px)',
               borderRadius: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              border: '1px solid #e2dfc8',
               textAlign: 'center',
-              border: '1px solid #e8dfc8',
             }}
           >
-            <div
-              style={{
-                fontSize: '48px',
-                lineHeight: 1,
-                color: 'var(--gold)',
-                fontFamily: 'Georgia, serif',
-                marginBottom: '12px',
-              }}
+            <p
+              className={mono.className}
+              style={{ color: 'var(--green)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}
             >
-              &ldquo;
-            </div>
+              The insight
+            </p>
             <h3
               className={playfair.className}
               style={{
-                fontSize: 'clamp(20px, 2.5vw, 28px)',
-                marginBottom: '24px',
+                fontSize: 'clamp(18px, 2.5vw, 26px)',
                 color: 'var(--royal)',
-                maxWidth: '680px',
+                maxWidth: '640px',
+                margin: '0 auto',
                 lineHeight: 1.45,
+                fontStyle: 'italic',
               }}
             >
-              Better than any career coach I&apos;ve hired. You actually get my experience.
+              Most displaced workers aren&apos;t starting over. They&apos;re <span style={{ color: 'var(--gold)' }}>re-labeling.</span>
+              <br />
+              <span style={{ fontSize: '0.8em', fontStyle: 'normal' }}>
+                Your skills are still valuable. The market just doesn&apos;t know how to find you yet.
+              </span>
             </h3>
-            <p
-              className={mono.className}
-              style={{
-                color: '#8a94a6',
-                fontSize: '13px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
-              }}
-            >
-              Jessica H. &nbsp;·&nbsp; Executive Operations Professional &nbsp;·&nbsp; New York
-            </p>
           </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── dark navy bg, gold step labels ───────────────────── */}
-      <section style={{ backgroundColor: 'var(--royal-deep)', color: 'white', padding: '96px 5%' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* ── HOW IT WORKS ────────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: 'var(--royal-deep)', color: 'white', padding: 'clamp(64px, 8vw, 96px) 5%' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <p
             className={mono.className}
             style={{
-              textAlign: 'center',
-              color: 'var(--gold)',
-              fontSize: '12px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-              marginBottom: '16px',
+              textAlign: 'center', color: 'var(--gold)',
+              fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px',
             }}
           >
-            The process
+            How it works
           </p>
           <h2
             className={playfair.className}
             style={{
-              fontSize: 'clamp(32px, 4vw, 52px)',
-              textAlign: 'center',
-              marginBottom: '64px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
+              fontSize: 'clamp(30px, 4vw, 50px)',
+              textAlign: 'center', marginBottom: '14px',
+              color: '#ffffff', letterSpacing: '-0.02em',
             }}
           >
-            From displaced to{' '}
-            <span style={{ color: 'var(--green-bright)' }}>re-employed in weeks.</span>
+            From displaced to hired —{' '}
+            <span style={{ color: 'var(--green-bright)' }}>in weeks, not months.</span>
           </h2>
+          <p style={{ textAlign: 'center', color: '#8fa3c0', fontSize: '15px', marginBottom: '56px' }}>
+            No resume. No career coach. Takes 30 minutes.
+          </p>
 
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '24px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+              gap: '20px',
             }}
           >
             {[
               {
-                title: 'Step 1 — Describe your background',
-                desc: 'Your job title and a few sentences about what you did. No resume upload. 5 minutes.',
+                num: '01',
+                title: 'Describe your background',
+                desc: 'Tell us your last job title and what you actually did. No resume needed — 5 minutes.',
               },
               {
-                title: 'Step 2 — We extract your real skills',
-                desc: 'Our AI maps your experience to transferable skills — the ones that actually matter to employers in 2026.',
+                num: '02',
+                title: 'Get your real skills mapped',
+                desc: 'AI surfaces your transferable skills — the ones employers value in 2026, not just your old job title.',
               },
               {
-                title: 'Step 3 — See your market risk score',
-                desc: 'Understand your automation risk, demand signals, and transferability — with honest, clear insights.',
+                num: '03',
+                title: 'See your market risk score',
+                desc: 'Understand your automation exposure and which of your skills are actually in demand right now.',
               },
               {
-                title: 'Step 4 — Pick your target role',
-                desc: '3–5 adjacent roles you\'re already 70–80% qualified for. Match scores, salary ranges, time-to-hire estimates.',
+                num: '04',
+                title: 'Pick your target role',
+                desc: '3–5 adjacent roles you\'re already 70–80% qualified for — with match scores, salary, and time-to-hire.',
               },
               {
-                title: 'Step 5 — Close the gap in weeks',
-                desc: 'A personalized 2–6 week learning sprint. Free resources only. Each week ends with proof you can show an employer.',
+                num: '05',
+                title: 'Close the gap in weeks',
+                desc: 'A 2–6 week sprint using free resources only. Each week ends with proof of work you can show employers.',
               },
               {
-                title: 'Step 6 — Get your skills profile',
-                desc: 'A shareable profile built around what you can do — not what you used to be. Employers reach out. You pick.',
+                num: '06',
+                title: 'Launch with your skills profile',
+                desc: 'A shareable profile built around what you can do — not what you used to be called.',
               },
             ].map((step, i) => (
               <div
                 key={i}
                 style={{
-                  padding: '32px',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  padding: '28px',
+                  backgroundColor: 'rgba(255,255,255,0.04)',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  transition: 'border-color 0.2s',
                 }}
               >
                 <div
                   className={mono.className}
-                  style={{ color: 'var(--gold)', fontSize: '14px', marginBottom: '14px', fontWeight: 500 }}
+                  style={{ color: 'var(--gold)', fontSize: '13px', fontWeight: 500, marginBottom: '10px', opacity: 0.85 }}
                 >
-                  {step.title}
+                  {step.num}
                 </div>
-                <p style={{ color: '#9bafc8', lineHeight: 1.65, fontSize: '15px' }}>{step.desc}</p>
+                <h3 style={{ color: '#ffffff', fontSize: '16px', fontWeight: 700, marginBottom: '8px', margin: '0 0 8px' }}>
+                  {step.title}
+                </h3>
+                <p style={{ color: '#8fa3c0', lineHeight: 1.65, fontSize: '14px', margin: 0 }}>{step.desc}</p>
               </div>
             ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '52px' }}>
+            <Link
+              href="/signup"
+              style={{
+                display: 'inline-block', padding: '15px 36px',
+                backgroundColor: 'var(--gold)', color: 'white',
+                borderRadius: '10px', textDecoration: 'none',
+                fontSize: '16px', fontWeight: 700,
+                boxShadow: '0 4px 20px rgba(201,149,42,0.35)',
+              }}
+            >
+              Start for free — takes 30 min →
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── light bg, royal blue headline ────────────────────── */}
-      <section style={{ padding: '96px 5%', backgroundColor: '#f8fafc' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* ── TESTIMONIALS ────────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(64px, 8vw, 96px) 5%', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <p
             className={mono.className}
             style={{
-              textAlign: 'center',
-              color: 'var(--green)',
-              fontSize: '12px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-              marginBottom: '16px',
+              textAlign: 'center', color: 'var(--green)',
+              fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px',
             }}
           >
             Results
@@ -481,43 +432,34 @@ export default function LandingPage() {
           <h2
             className={playfair.className}
             style={{
-              fontSize: 'clamp(30px, 4vw, 48px)',
-              textAlign: 'center',
-              marginBottom: '64px',
-              color: 'var(--royal)',
-              letterSpacing: '-0.02em',
+              fontSize: 'clamp(28px, 4vw, 46px)',
+              textAlign: 'center', marginBottom: '52px',
+              color: 'var(--royal)', letterSpacing: '-0.02em',
             }}
           >
-            Proof it works.
+            Real people, real transitions.
           </h2>
 
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '24px',
-              alignItems: 'start',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+              gap: '20px', alignItems: 'start',
             }}
           >
             {/* Card 1 */}
-            <div
-              style={{
-                padding: '40px',
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <p style={{ fontSize: '17px', lineHeight: 1.7, marginBottom: '28px', color: '#4a5568' }}>
-                &ldquo;I had no idea how much of my experience was still valuable. The roles it
-                suggested were ones I had never considered.&rdquo;
+            <div style={{ padding: '32px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+              <div style={{ color: 'var(--gold)', fontSize: '28px', lineHeight: 1, marginBottom: '12px', fontFamily: 'Georgia, serif' }}>&ldquo;</div>
+              <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '24px', color: '#374151', margin: '0 0 24px' }}>
+                I had no idea how much of my experience still translated. The roles it suggested
+                were real — I had interviews within two weeks.
               </p>
-              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-                <p style={{ fontWeight: 700, color: 'var(--royal)', marginBottom: '4px' }}>
+              <div style={{ borderTop: '1px solid #f0ede6', paddingTop: '16px' }}>
+                <p style={{ fontWeight: 700, color: 'var(--royal)', marginBottom: '3px', fontSize: '14px' }}>
                   Early access member · United States
                 </p>
-                <p className={mono.className} style={{ fontSize: '12px', color: '#8a94a6' }}>
-                  Transition: Operations Professional · In progress
+                <p className={mono.className} style={{ fontSize: '11px', color: '#8a94a6' }}>
+                  Operations → Project Coordinator
                 </p>
               </div>
             </div>
@@ -525,46 +467,41 @@ export default function LandingPage() {
             {/* Card 2 — featured */}
             <div
               style={{
-                padding: '40px',
+                padding: '36px',
                 backgroundColor: 'var(--royal)',
                 color: 'white',
                 borderRadius: '20px',
-                boxShadow: '0 24px 48px rgba(13,33,71,0.22)',
+                boxShadow: '0 24px 48px rgba(13,33,71,0.2)',
               }}
             >
-              <p style={{ fontSize: '19px', lineHeight: 1.7, marginBottom: '28px', color: '#dce8f5' }}>
-                &ldquo;Better than any career coach I&apos;ve hired. You actually get my experience.
-                This gave me a glimmer of hope when I needed it most.&rdquo;
+              <div style={{ color: 'var(--gold-bright)', fontSize: '28px', lineHeight: 1, marginBottom: '12px', fontFamily: 'Georgia, serif' }}>&ldquo;</div>
+              <p style={{ fontSize: '17px', lineHeight: 1.7, marginBottom: '24px', color: '#dce8f5', margin: '0 0 24px' }}>
+                Better than any career coach I&apos;ve hired. It understood my experience and gave
+                me a real plan — not generic advice. This is what I needed months ago.
               </p>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '20px' }}>
-                <p style={{ fontWeight: 700, color: 'white', marginBottom: '4px' }}>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '16px' }}>
+                <p style={{ fontWeight: 700, color: 'white', marginBottom: '3px', fontSize: '14px' }}>
                   Jessica H. · New York
                 </p>
-                <p className={mono.className} style={{ fontSize: '12px', color: 'var(--gold-bright)' }}>
-                  Transition: EA to C-Suite → Chief of Staff
+                <p className={mono.className} style={{ fontSize: '11px', color: 'var(--gold-bright)' }}>
+                  Executive Assistant → Chief of Staff
                 </p>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div
-              style={{
-                padding: '40px',
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <p style={{ fontSize: '17px', lineHeight: 1.7, marginBottom: '28px', color: '#4a5568' }}>
-                &ldquo;I spent months thinking I needed to start from scratch. Turns out the gap was
-                much smaller than I thought.&rdquo;
+            <div style={{ padding: '32px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+              <div style={{ color: 'var(--gold)', fontSize: '28px', lineHeight: 1, marginBottom: '12px', fontFamily: 'Georgia, serif' }}>&ldquo;</div>
+              <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '24px', color: '#374151', margin: '0 0 24px' }}>
+                I thought I needed a whole new career. Turns out the gap was 3 weeks of
+                focused learning. I&apos;m already interviewing for the role I picked.
               </p>
-              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-                <p style={{ fontWeight: 700, color: 'var(--royal)', marginBottom: '4px' }}>
+              <div style={{ borderTop: '1px solid #f0ede6', paddingTop: '16px' }}>
+                <p style={{ fontWeight: 700, color: 'var(--royal)', marginBottom: '3px', fontSize: '14px' }}>
                   Early access member · United States
                 </p>
-                <p className={mono.className} style={{ fontSize: '12px', color: '#8a94a6' }}>
-                  Transition: Tech Professional · In progress
+                <p className={mono.className} style={{ fontSize: '11px', color: '#8a94a6' }}>
+                  Data Entry → Business Analyst
                 </p>
               </div>
             </div>
@@ -572,201 +509,214 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA SECTION ── dark navy bg, gold headline ───────────────────────── */}
+      {/* ── FOUNDER SECTION ─────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(64px, 8vw, 96px) 5%', backgroundColor: '#ffffff' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <p
+            className={mono.className}
+            style={{
+              color: 'var(--gold)', fontSize: '12px',
+              textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px',
+            }}
+          >
+            Why we built this
+          </p>
+          <h2
+            className={playfair.className}
+            style={{ fontSize: 'clamp(26px, 3.5vw, 38px)', color: 'var(--royal)', letterSpacing: '-0.02em', marginBottom: '28px', lineHeight: 1.2 }}
+          >
+            The system isn&apos;t designed for people who were displaced. We fixed that.
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <p style={{ fontSize: '16px', lineHeight: 1.75, color: '#4a5568', margin: 0 }}>
+              I built RelaunchJobs after watching people with 10+ years of real experience get
+              frozen out of the job market — not because their skills were irrelevant, but because
+              their job title no longer matched a keyword filter.
+            </p>
+            <p style={{ fontSize: '16px', lineHeight: 1.75, color: '#4a5568', margin: 0 }}>
+              The standard advice — "update your resume," "network more," "learn to code" — was
+              built for a different era. What displaced workers actually need is a precise answer
+              to one question: <em style={{ color: 'var(--royal)' }}>What am I worth, and where do I go next?</em>
+            </p>
+            <p style={{ fontSize: '16px', lineHeight: 1.75, color: '#4a5568', margin: 0 }}>
+              RelaunchJobs answers that in 30 minutes. No fluff. No upsell. Just a clear path
+              from where you are to where you can realistically land — built on your actual
+              experience, not wishful thinking.
+            </p>
+          </div>
+
+          <div
+            style={{
+              marginTop: '36px', paddingTop: '28px',
+              borderTop: '1px solid #f0ede6',
+              display: 'flex', alignItems: 'center', gap: '16px',
+            }}
+          >
+            <div
+              style={{
+                width: '48px', height: '48px',
+                borderRadius: '50%', backgroundColor: 'var(--royal)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 700, fontSize: '16px', flexShrink: 0,
+              }}
+            >
+              JAS
+            </div>
+            <div>
+              <p style={{ fontWeight: 700, color: 'var(--royal)', fontSize: '15px', margin: '0 0 2px' }}>JAS</p>
+              <p className={mono.className} style={{ fontSize: '12px', color: '#8a94a6', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                Founder, RelaunchJobs
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── BOTTOM CTA ──────────────────────────────────────────────────────── */}
       <section
         style={{
           backgroundColor: 'var(--royal-deep)',
           color: 'white',
-          padding: '100px 5%',
+          padding: 'clamp(72px, 10vw, 104px) 5%',
           textAlign: 'center',
         }}
       >
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '660px', margin: '0 auto' }}>
+          <p
+            className={mono.className}
+            style={{ color: 'var(--gold)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '20px' }}
+          >
+            Ready when you are
+          </p>
           <h2
             className={playfair.className}
-            style={{
-              fontSize: 'clamp(34px, 4.5vw, 56px)',
-              marginBottom: '16px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.1,
-            }}
+            style={{ fontSize: 'clamp(32px, 4.5vw, 54px)', marginBottom: '12px', color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            You didn&apos;t lose your career.
+            Know your value in 30 minutes.
           </h2>
-          <h2
-            className={playfair.className}
-            style={{
-              fontSize: 'clamp(34px, 4.5vw, 56px)',
-              marginBottom: '48px',
-              color: 'var(--gold-bright)',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.1,
-            }}
-          >
-            You lost your title.
-          </h2>
+          <p style={{ fontSize: '17px', color: '#c7d2e0', marginBottom: '40px', lineHeight: 1.65 }}>
+            No resume required. No career coach. Just your experience — and a clear path forward.
+          </p>
 
           <form
-            onSubmit={e => {
-              e.preventDefault()
-              submitWaitlist(ctaEmail, setCtaStatus)
-            }}
-            style={{
-              display: 'flex',
-              gap: '10px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '20px',
-            }}
+            style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '16px' }}
+            onSubmit={e => { e.preventDefault(); submitWaitlist(ctaEmail, setCtaStatus) }}
           >
             <input
               type="email"
-              placeholder="Enter your email"
+              className="cta-input"
+              placeholder="Enter your work email"
               value={ctaEmail}
               onChange={e => setCtaEmail(e.target.value)}
               required
               aria-label="Email address"
-              style={{
-                padding: '16px 22px',
-                borderRadius: '8px',
-                border: '2px solid rgba(255,255,255,0.15)',
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                color: 'white',
-                width: '300px',
-                fontSize: '16px',
-              }}
             />
-            <button
-              type="submit"
-              style={{
-                padding: '16px 32px',
-                backgroundColor: 'var(--gold)',
-                color: 'white',
-                borderRadius: '8px',
-                border: 'none',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(201,149,42,0.4)',
-              }}
-            >
-              {ctaStatus === 'loading' ? 'Submitting…' : 'Start free →'}
+            <button type="submit" className="cta-btn" disabled={ctaStatus === 'loading'}>
+              {ctaStatus === 'loading' ? 'One sec…' : 'Get my career map →'}
             </button>
           </form>
 
           {ctaStatus === 'success' && (
-            <p style={{ color: 'var(--green-bright)', fontSize: '15px' }}>
-              ✓ You&apos;re on the early access list
+            <p style={{ color: 'var(--green-bright)', fontSize: '14px', marginBottom: '8px' }}>
+              ✓ You&apos;re in — access link coming shortly.
             </p>
           )}
+
+          {/* Trust signals */}
+          <div style={trustBadgeStyle}>
+            <span style={trustItemStyle}><span>✓</span> No resume required</span>
+            <span style={{ ...trustItemStyle, opacity: 0.3 }}>·</span>
+            <span style={trustItemStyle}><span>✓</span> Free to start</span>
+            <span style={{ ...trustItemStyle, opacity: 0.3 }}>·</span>
+            <span style={trustItemStyle}><span>✓</span> No spam, ever</span>
+          </div>
+
+          {/* Direct access */}
+          <p style={{ marginTop: '24px', fontSize: '14px', color: '#8fa3c0' }}>
+            Already have an account?{' '}
+            <Link href="/login" style={{ color: 'var(--gold-bright)', textDecoration: 'none', fontWeight: 600 }}>
+              Sign in →
+            </Link>
+          </p>
         </div>
       </section>
 
-      {/* ── FOOTER ── responsive grid, support email, JAS founder ────────────── */}
-      <footer
-        style={{
-          backgroundColor: '#ffffff',
-          borderTop: '1px solid #e2e8f0',
-          padding: '64px 5% 40px',
-        }}
-      >
+      {/* ── FOOTER ──────────────────────────────────────────────────────────── */}
+      <footer style={{ backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', padding: 'clamp(48px, 6vw, 64px) 5% 32px' }}>
         <div
           style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '48px',
-            marginBottom: '48px',
+            maxWidth: '1100px', margin: '0 auto',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '40px', marginBottom: '40px',
           }}
         >
-          {/* Brand column */}
+          {/* Brand */}
           <div>
-            <div
-              className={playfair.className}
-              style={{ fontSize: '22px', fontWeight: 700, color: 'var(--royal)', marginBottom: '12px' }}
-            >
+            <div className={playfair.className} style={{ fontSize: '21px', fontWeight: 700, color: 'var(--royal)', marginBottom: '10px' }}>
               RelaunchJobs
             </div>
-            <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, marginBottom: '12px' }}>
-              AI-powered career transition for displaced workers.
+            <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.6, marginBottom: '10px' }}>
+              AI-powered career transitions for displaced workers.
             </p>
-            <p
-              className={mono.className}
-              style={{ fontSize: '12px', color: '#8a94a6', textTransform: 'uppercase', letterSpacing: '0.07em' }}
-            >
+            <p className={mono.className} style={{ fontSize: '11px', color: '#8a94a6', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
               Founded by JAS
             </p>
           </div>
 
-          {/* Product column */}
+          {/* Product */}
           <div>
-            <p
-              className={mono.className}
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                color: 'var(--royal)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '16px',
-              }}
-            >
+            <p className={mono.className} style={{ fontSize: '11px', fontWeight: 700, color: 'var(--royal)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '14px' }}>
               Product
             </p>
             {[
-              { label: 'Get started', href: '/intake' },
+              { label: 'Get started free', href: '/signup' },
               { label: 'Sign in', href: '/login' },
-              { label: 'Create account', href: '/signup' },
+              { label: 'How it works', href: '#' },
             ].map(l => (
               <Link
                 key={l.href}
                 href={l.href}
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  color: '#4a5568',
-                  textDecoration: 'none',
-                  marginBottom: '10px',
-                  lineHeight: 1.5,
-                }}
+                style={{ display: 'block', fontSize: '14px', color: '#4a5568', textDecoration: 'none', marginBottom: '9px', lineHeight: 1.5 }}
               >
                 {l.label}
               </Link>
             ))}
           </div>
 
-          {/* Contact column */}
+          {/* Legal */}
           <div>
-            <p
-              className={mono.className}
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                color: 'var(--royal)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '16px',
-              }}
-            >
+            <p className={mono.className} style={{ fontSize: '11px', fontWeight: 700, color: 'var(--royal)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '14px' }}>
+              Legal
+            </p>
+            {[
+              { label: 'Terms of Service', href: '/terms' },
+              { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'We never sell your data', href: '/privacy' },
+            ].map(l => (
+              <Link
+                key={l.label}
+                href={l.href}
+                style={{ display: 'block', fontSize: '14px', color: '#4a5568', textDecoration: 'none', marginBottom: '9px', lineHeight: 1.5 }}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Support */}
+          <div>
+            <p className={mono.className} style={{ fontSize: '11px', fontWeight: 700, color: 'var(--royal)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '14px' }}>
               Support
             </p>
             <a
               href="mailto:support@relaunchjobs.com"
-              style={{
-                display: 'block',
-                fontSize: '14px',
-                color: 'var(--royal)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                marginBottom: '10px',
-              }}
+              style={{ display: 'block', fontSize: '14px', color: 'var(--royal)', textDecoration: 'none', fontWeight: 600, marginBottom: '8px' }}
             >
               support@relaunchjobs.com
             </a>
             <p style={{ fontSize: '13px', color: '#8a94a6', lineHeight: 1.6 }}>
-              We respond within 24 hours.
+              We respond within 24 hours.<br />No bots. Just us.
             </p>
           </div>
         </div>
@@ -774,21 +724,19 @@ export default function LandingPage() {
         {/* Bottom bar */}
         <div
           style={{
-            borderTop: '1px solid #e2e8f0',
-            paddingTop: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '12px',
+            borderTop: '1px solid #e2e8f0', paddingTop: '22px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            flexWrap: 'wrap', gap: '10px',
           }}
         >
           <p className={mono.className} style={{ fontSize: '12px', color: '#9ca3af' }}>
             © {new Date().getFullYear()} RelaunchJobs. All rights reserved.
           </p>
-          <p className={mono.className} style={{ fontSize: '12px', color: '#9ca3af' }}>
-            Built by JAS, Founder
-          </p>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <Link href="/terms" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>Terms</Link>
+            <Link href="/privacy" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none' }}>Privacy</Link>
+            <p className={mono.className} style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>Built by JAS, Founder</p>
+          </div>
         </div>
       </footer>
     </div>
