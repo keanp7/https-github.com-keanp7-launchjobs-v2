@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
 import { createClient, throwOnDbError } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
+import { validateRequiredFields } from "@/lib/validateFields"
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +40,8 @@ export async function POST(request: NextRequest) {
     } catch {
       throw new Error(`AI returned invalid JSON: ${clean.substring(0, 200)}`)
     }
+
+    validateRequiredFields({ candidate_id }, ["candidate_id"], "skills_analyses")
 
     const { error } = await supabase
       .from("skills_analyses")

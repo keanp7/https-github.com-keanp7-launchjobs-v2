@@ -141,7 +141,7 @@ export function LearningPath() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {learning.weeks.map((week) => (
+          {(learning.weeks ?? []).map((week) => (
             <div key={week.week} className="space-y-2 border-b pb-4 last:border-0 last:pb-0">
               <div className="flex items-center gap-3">
                 <span className="shrink-0 font-mono text-xs font-bold text-blue-600 bg-blue-50 rounded px-2 py-0.5">
@@ -151,7 +151,7 @@ export function LearningPath() {
               </div>
               <p className="text-xs text-muted-foreground">{week.goal}</p>
               <div className="space-y-1">
-                {week.resources.map((r, i) => (
+                {(week.resources ?? []).map((r, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <Badge variant={r.cost === "free" ? "outline" : "secondary"} className="text-[10px] px-1.5 py-0">

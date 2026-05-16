@@ -12,6 +12,8 @@ const PRIORITY_VARIANT: Record<string, "destructive" | "secondary" | "outline"> 
 }
 
 export function GapDisplay({ roleGap }: { roleGap: RoleGapAnalysis }) {
+  if (!roleGap) return <div className="text-sm text-muted-foreground p-4">Loading gap analysis…</div>
+
   return (
     <div className="space-y-4">
       <Card>
@@ -27,7 +29,7 @@ export function GapDisplay({ roleGap }: { roleGap: RoleGapAnalysis }) {
             <Progress value={roleGap.readiness_percent} />
           </div>
           <div className="flex flex-wrap gap-2">
-            {roleGap.already_have.map((s) => (
+            {(roleGap.already_have ?? []).map((s) => (
               <span key={s} className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-800">{s}</span>
             ))}
           </div>
@@ -44,7 +46,7 @@ export function GapDisplay({ roleGap }: { roleGap: RoleGapAnalysis }) {
           <CardTitle className="text-base">Gaps to Close</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {roleGap.gaps.map((g) => (
+          {(roleGap.gaps ?? []).map((g) => (
             <div key={g.skill} className="space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{g.skill}</span>

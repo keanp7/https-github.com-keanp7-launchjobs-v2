@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAnthropicClient, MODEL } from "@/lib/anthropic/client"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, throwOnDbError } from "@/lib/supabase/server"
 import { PROMPTS } from "@/lib/anthropic/prompts"
+import { validateRequiredFields } from "@/lib/validateFields"
 
 // ── Fallback profile used when AI call fails or times out ────────────────────
 function buildFallbackProfile(jobTitle: string): object {
@@ -123,6 +124,8 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Save to DB (always) ──────────────────────────────────────────────────
+  validateRequiredFields({ candidate_id }, ["candidate_id"], "candidate_profiles")
+
   const { data: savedRow, error: dbError } = await supabase
     .from("candidate_profiles")
     .upsert({
@@ -138,6 +141,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   console.log("[profile] DB save:", savedRow ? "OK" : "null", "error:", dbError?.message)
+  if (dbError) throwOnDbError(dbError, "profile/candidate_profiles upsert")
 
   return NextResponse.json({ success: true, data: parsed, fallback: usedFallback })
 }

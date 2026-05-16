@@ -113,6 +113,10 @@ function IntakeForm() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No user found')
 
+      // Pre-flight: ensure required NOT NULL fields are present before upsert
+      if (!user.id) throw new Error('Missing required field "id" for candidates table')
+      if (!formData.jobTitle) throw new Error('Please fill in your job title before continuing')
+
       // Save all answers and mark step 5 before running pipeline
       const { data: candidate, error: candidateError } = await supabase
         .from('candidates')
