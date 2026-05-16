@@ -1,27 +1,88 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLang } from '@/contexts/LangContext'
 import { toast } from 'sonner'
 import './intake.css'
 
-export default function IntakePage() {
+function IntakeForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [flashMessage, setFlashMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
   const [formData, setFormData] = useState({
     jobTitle: '',
     yearsExp: '',
     industry: '',
     reason: '',
-    context: ''
+    context: '',
   })
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { t } = useLang()
+
+  // Load saved progress on mount
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: candidate } = await supabase
+        .from('candidates')
+        .select('intake_step, intake_answers, onboarding_completed')
+        .eq('profile_id', user.id)
+        .single()
+
+      if (!candidate) return
+
+      // Already completed — skip straight to analysis
+      if (candidate.onboarding_completed) {
+        router.replace('/analysis')
+        return
+      }
+
+      // Restore saved answers
+      if (candidate.intake_answers && Object.keys(candidate.intake_answers).length > 0) {
+        setFormData(prev => ({ ...prev, ...(candidate.intake_answers as typeof formData) }))
+      }
+
+      // Resume from ?step= URL param, or last saved step
+      const urlStep = parseInt(searchParams.get('step') ?? '0')
+      const savedStep = candidate.intake_step ?? 1
+      const startStep = urlStep > 0 ? urlStep : savedStep
+      setCurrentStep(Math.min(Math.max(startStep, 1), 5))
+    }
+    load()
+  }, [router, searchParams])
+
+  const saveProgress = async (nextStep: number, answers: typeof formData) => {
+    setIsSaving(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      await supabase
+        .from('candidates')
+        .upsert(
+          {
+            profile_id: user.id,
+            onboarding_started: true,
+            intake_step: nextStep,
+            intake_answers: answers,
+          },
+          { onConflict: 'profile_id' }
+        )
+    } catch (e) {
+      console.error('Save progress error:', e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleSubmit = async () => {
     setIsLoading(true)
@@ -45,94 +106,87 @@ export default function IntakePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No user found')
 
+      // Save all answers and mark step 5 before running pipeline
       const { data: candidate, error: candidateError } = await supabase
         .from('candidates')
-        .upsert({
-          profile_id: user?.id,
-          old_job_title: formData.jobTitle,
-          years_experience: parseInt(formData.yearsExp) || 1,
-          industry: formData.industry,
-          displacement_reason: formData.reason,
-          extra_context: formData.context,
-          status: 'intake'
-        }, {
-          onConflict: 'profile_id'
-        })
+        .upsert(
+          {
+            profile_id: user.id,
+            old_job_title: formData.jobTitle,
+            years_experience: parseInt(formData.yearsExp) || 1,
+            industry: formData.industry,
+            displacement_reason: formData.reason,
+            extra_context: formData.context,
+            status: 'intake',
+            onboarding_started: true,
+            intake_step: 5,
+            intake_answers: formData,
+          },
+          { onConflict: 'profile_id' }
+        )
         .select('id')
         .single()
 
-      if (candidateError) {
-        throw new Error(`Candidate insert failed: ${candidateError.message}`)
-      }
+      if (candidateError) throw new Error(`Candidate insert failed: ${candidateError.message}`)
+      if (!candidate?.id) throw new Error('Candidate created but no ID returned')
 
-      if (!candidate?.id) {
-        throw new Error('Candidate created but no ID returned')
-      }
-
+      // Run pipeline steps
       const res = await fetch('/api/pipeline/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidate_id: candidate.id,
-          intake_data: formData
-        })
+        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData }),
       })
-
       if (!res.ok) {
         const errorData = await res.json()
         throw new Error(errorData.details || 'Pipeline failed')
       }
 
-      // Step 2 - Risk scoring
       const riskRes = await fetch('/api/pipeline/risk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
+        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData }),
       })
       const riskData = await riskRes.json()
       if (!riskRes.ok) throw new Error(riskData.details || 'Risk scoring failed')
-      console.log('[intake] Risk response:', riskData)
 
-      // Step 3 - Role matching
       const matchRes = await fetch('/api/pipeline/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
+        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData }),
       })
       if (!matchRes.ok) {
         const e = await matchRes.json()
         throw new Error(e.details || 'Role matching failed')
       }
-      const matchData = await matchRes.json()
-      console.log('[intake] Match response:', JSON.stringify(matchData))
-      console.log('[intake] target_roles saved:', matchData?.data?.target_roles?.length, 'roles')
 
-      // Step 4 - Gap analysis
       const gapRes = await fetch('/api/pipeline/gap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData })
+        body: JSON.stringify({ candidate_id: candidate.id, intake_data: formData }),
       })
       if (!gapRes.ok) {
         const e = await gapRes.json()
         console.warn('[intake] Gap analysis failed (non-fatal):', e.details)
-      } else {
-        const gapData = await gapRes.json()
-        console.log('[intake] Gap response:', gapData)
       }
+
+      // Mark onboarding complete → next visit skips intake entirely
+      await supabase
+        .from('candidates')
+        .update({ onboarding_completed: true })
+        .eq('profile_id', user.id)
 
       clearInterval(interval)
       router.push('/analysis')
-    } catch(error: any) {
+    } catch (error: any) {
       clearInterval(interval)
       setIsLoading(false)
       setLoadingMessage('')
-      console.error("Submit error:", error)
+      console.error('Submit error:', error)
       toast.error(error.message || 'Something went wrong. Your answers are saved — please try again.')
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 5) {
       handleSubmit()
       return
@@ -141,6 +195,7 @@ export default function IntakePage() {
     if (currentStep === 1) {
       if (!formData.jobTitle.trim()) { toast.error('Please enter your job title.'); return }
       setFlashMessage(t('intake.gotIt', { title: formData.jobTitle }))
+      await saveProgress(2, formData)
       setTimeout(() => {
         setFlashMessage('')
         setCurrentStep(2)
@@ -152,15 +207,13 @@ export default function IntakePage() {
     if (currentStep === 3 && !formData.industry.trim()) { toast.error('Please enter your industry.'); return }
     if (currentStep === 4 && !formData.reason) { toast.error('Please select your displacement reason.'); return }
 
-    if (currentStep < 5) {
-      setCurrentStep(prev => prev + 1)
-    }
+    const nextStep = currentStep + 1
+    await saveProgress(nextStep, formData)
+    setCurrentStep(nextStep)
   }
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1)
-    }
+    if (currentStep > 1) setCurrentStep(prev => prev - 1)
   }
 
   const renderStep = (step: number) => {
@@ -173,8 +226,11 @@ export default function IntakePage() {
             <input
               type="text"
               className="intake-input"
+              placeholder="e.g. Customer Support Team Lead"
               value={formData.jobTitle}
               onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && handleNext()}
+              autoFocus
             />
           </>
         )
@@ -204,8 +260,11 @@ export default function IntakePage() {
             <input
               type="text"
               className="intake-input"
+              placeholder="e.g. SaaS, Healthcare, Finance"
               value={formData.industry}
               onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && handleNext()}
+              autoFocus
             />
           </>
         )
@@ -240,6 +299,7 @@ export default function IntakePage() {
               placeholder={t('intake.step5Placeholder')}
               value={formData.context}
               onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+              autoFocus
             />
           </>
         )
@@ -254,12 +314,9 @@ export default function IntakePage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#1a3a6b', margin: 0 }}>RelaunchJobs</h1>
           <div style={{
-            width: '40px',
-            height: '40px',
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #1a3a6b',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
+            width: '40px', height: '40px',
+            border: '4px solid #e5e7eb', borderTop: '4px solid #1a3a6b',
+            borderRadius: '50%', animation: 'spin 1s linear infinite',
           }} />
           <p style={{ color: '#6b7280', fontSize: '15px' }}>{loadingMessage}</p>
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
@@ -271,12 +328,12 @@ export default function IntakePage() {
   return (
     <div className="intake-wrapper">
       <div className="progress-bar-wrap">
-        <div className="progress-label">{t('intake.stepOf', { current: currentStep })}</div>
+        <div className="progress-label">
+          {t('intake.stepOf', { current: currentStep })}
+          {isSaving && <span style={{ fontSize: '11px', color: '#9ca3af', marginLeft: '8px' }}>Saving…</span>}
+        </div>
         <div className="progress-track">
-          <div
-            className="progress-fill"
-            style={{ width: `${(currentStep / 5) * 100}%` }}
-          />
+          <div className="progress-fill" style={{ width: `${(currentStep / 5) * 100}%` }} />
         </div>
       </div>
 
@@ -294,5 +351,18 @@ export default function IntakePage() {
         </button>
       </div>
     </div>
+  )
+}
+
+export default function IntakePage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '36px', height: '36px', border: '3px solid #e5e7eb', borderTop: '3px solid #1a3a6b', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }`}</style>
+      </div>
+    }>
+      <IntakeForm />
+    </Suspense>
   )
 }
