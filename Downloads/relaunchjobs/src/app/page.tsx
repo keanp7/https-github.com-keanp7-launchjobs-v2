@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Playfair_Display } from "next/font/google"
 import { LangToggle } from "@/components/landing/LangToggle"
+import { useLang } from "@/contexts/LangContext"
 
 const playfair = Playfair_Display({ subsets: ["latin"] })
 
@@ -23,41 +24,8 @@ const C = {
   subtle: "#f1f5f9",
 }
 
-// ── Pain points ────────────────────────────────────────────────────────────────
-const PAIN_POINTS = [
-  {
-    icon: "🤖",
-    title: "ATS filters you out instantly",
-    body: "Automated systems reject your résumé before a human ever sees it — because your title doesn't match a keyword.",
-  },
-  {
-    icon: "👻",
-    title: "Ghost jobs waste your time",
-    body: "Roles stay posted for months after they're filled. You apply into a void and hear nothing.",
-  },
-  {
-    icon: "📚",
-    title: '"Just reskill" isn\'t advice',
-    body: "Every platform tells you to learn something new. None of them tell you what to do with the experience you already have.",
-  },
-  {
-    icon: "🔄",
-    title: "Your experience doesn't translate",
-    body: "You've done the work. But without the right title history, hiring managers can't see it.",
-  },
-]
+const STATS_VALUES = ["6,500+", "3 wks", "92%"]
 
-// ── How it works steps ─────────────────────────────────────────────────────────
-const STEPS = [
-  { n: "01", title: "Describe your background", body: "Tell us your last role, industry, and what happened. 5 minutes." },
-  { n: "02", title: "AI extracts your skills", body: "We identify every transferable skill — including ones you wouldn't think to list." },
-  { n: "03", title: "Risk scoring", body: "Each skill gets scored for AI automation risk so you know what to lean into." },
-  { n: "04", title: "Role matching", body: "We surface adjacent roles your existing skills qualify you for right now." },
-  { n: "05", title: "Gap sprint", body: "A targeted learning plan — only the gaps that matter for your target role." },
-  { n: "06", title: "Skills profile", body: "A shareable profile that translates your experience for any hiring manager." },
-]
-
-// ── Testimonials ───────────────────────────────────────────────────────────────
 const TESTIMONIALS = [
   {
     quote: "I'd been an Executive Assistant for 11 years. Every job board told me I was 'overqualified' for entry-level ops roles and underqualified for director roles. RelaunchJobs showed me I already had the skills for Chief of Staff — I just didn't know how to frame it.",
@@ -79,14 +47,10 @@ const TESTIMONIALS = [
   },
 ]
 
-// ── Stat badges ────────────────────────────────────────────────────────────────
-const STATS = [
-  { value: "6,500+", label: "workers validated" },
-  { value: "3 wks", label: "avg. gap closure" },
-  { value: "92%", label: "qualification rate" },
-]
+const PAIN_ICONS = ["🤖", "👻", "📚", "🔄"]
 
 export default function LandingPage() {
+  const { t } = useLang()
   const [scrolled, setScrolled] = useState(false)
   const [ctaLoading, setCtaLoading] = useState(false)
 
@@ -100,6 +64,35 @@ export default function LandingPage() {
     setCtaLoading(true)
     window.location.href = "/signup"
   }
+
+  const PAIN_POINTS = [
+    { icon: PAIN_ICONS[0], title: t("landing.problem.p0title"), body: t("landing.problem.p0body") },
+    { icon: PAIN_ICONS[1], title: t("landing.problem.p1title"), body: t("landing.problem.p1body") },
+    { icon: PAIN_ICONS[2], title: t("landing.problem.p2title"), body: t("landing.problem.p2body") },
+    { icon: PAIN_ICONS[3], title: t("landing.problem.p3title"), body: t("landing.problem.p3body") },
+  ]
+
+  const STEPS = [
+    { n: "01", title: t("landing.how.s01title"), body: t("landing.how.s01body") },
+    { n: "02", title: t("landing.how.s02title"), body: t("landing.how.s02body") },
+    { n: "03", title: t("landing.how.s03title"), body: t("landing.how.s03body") },
+    { n: "04", title: t("landing.how.s04title"), body: t("landing.how.s04body") },
+    { n: "05", title: t("landing.how.s05title"), body: t("landing.how.s05body") },
+    { n: "06", title: t("landing.how.s06title"), body: t("landing.how.s06body") },
+  ]
+
+  const STATS = [
+    { value: STATS_VALUES[0], label: t("landing.hero.stat1Label") },
+    { value: STATS_VALUES[1], label: t("landing.hero.stat2Label") },
+    { value: STATS_VALUES[2], label: t("landing.hero.stat3Label") },
+  ]
+
+  const TRUST_ITEMS = [
+    t("landing.trust.t1"),
+    t("landing.trust.t2"),
+    t("landing.trust.t3"),
+    t("landing.trust.t4"),
+  ]
 
   return (
     <div style={{ fontFamily: "inherit", background: C.white, color: C.text }}>
@@ -142,10 +135,9 @@ export default function LandingPage() {
             RelaunchJobs
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <a href="#how-it-works" style={{ fontSize: 14, color: C.muted, textDecoration: "none", padding: "8px 12px", display: "none" } as React.CSSProperties}>How it works</a>
             <LangToggle />
-            <Link href="/login" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 14 }}>Sign in</Link>
-            <Link href="/signup" className="btn-primary" style={{ padding: "10px 20px", fontSize: 14 }}>Get started free</Link>
+            <Link href="/login" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 14 }}>{t("landing.nav.signIn")}</Link>
+            <Link href="/signup" className="btn-primary" style={{ padding: "10px 20px", fontSize: 14 }}>{t("landing.nav.getStarted")}</Link>
           </div>
         </div>
       </nav>
@@ -166,7 +158,7 @@ export default function LandingPage() {
             fontSize: 13, fontWeight: 600, color: C.gold,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.goldBright, display: "inline-block", animation: "pulse 2s infinite" }} />
-            AI-Powered Career Transition
+            {t("landing.hero.badge")}
           </div>
 
           {/* Headline */}
@@ -175,8 +167,8 @@ export default function LandingPage() {
             lineHeight: 1.15, color: C.royalDeep, marginBottom: 20,
             letterSpacing: "-0.02em",
           }}>
-            Your skills didn't disappear.<br />
-            <span style={{ color: C.gold }}>Your title did.</span>
+            {t("landing.hero.h1")}<br />
+            <span style={{ color: C.gold }}>{t("landing.hero.h2")}</span>
           </h1>
 
           {/* Sub */}
@@ -184,16 +176,16 @@ export default function LandingPage() {
             fontSize: "clamp(16px, 2.5vw, 20px)", color: C.muted,
             lineHeight: 1.6, maxWidth: 580, margin: "0 auto 40px",
           }}>
-            RelaunchJobs maps your existing experience to roles you qualify for right now — then builds the shortest path to landing them.
+            {t("landing.hero.sub")}
           </p>
 
           {/* CTA */}
           <div className="fade-up-3 stack-mobile" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
             <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 36px" }}>
-              {ctaLoading ? "Loading…" : "Start free →"}
+              {ctaLoading ? t("landing.hero.loading") : t("landing.hero.ctaStart")}
             </button>
             <a href="#how-it-works" className="btn-ghost" style={{ fontSize: 16, padding: "16px 28px" }}>
-              See how it works
+              {t("landing.hero.ctaHow")}
             </a>
           </div>
 
@@ -216,12 +208,7 @@ export default function LandingPage() {
           display: "flex", alignItems: "center", justifyContent: "center",
           gap: "clamp(16px, 4vw, 48px)", flexWrap: "wrap",
         }}>
-          {[
-            "✓  No résumé rewriting",
-            "✓  No generic job boards",
-            "✓  Built for AI-displaced workers",
-            "✓  Free to start",
-          ].map((item) => (
+          {TRUST_ITEMS.map((item) => (
             <span key={item} style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>
               {item}
             </span>
@@ -233,12 +220,12 @@ export default function LandingPage() {
       <section id="problem" style={{ padding: "96px 24px", background: C.bg }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.gold, textTransform: "uppercase" }}>The problem</span>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.gold, textTransform: "uppercase" }}>{t("landing.problem.label")}</span>
             <h2 className={playfair.className} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 700, color: C.royalDeep, marginTop: 12, lineHeight: 1.2 }}>
-              The system wasn't built for you
+              {t("landing.problem.title")}
             </h2>
             <p style={{ color: C.muted, fontSize: 16, marginTop: 12, maxWidth: 540, margin: "12px auto 0" }}>
-              Traditional job search tools assume a linear career path. Yours just got interrupted.
+              {t("landing.problem.sub")}
             </p>
           </div>
 
@@ -262,9 +249,9 @@ export default function LandingPage() {
       <section id="how-it-works" style={{ padding: "96px 24px", background: C.white }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.green, textTransform: "uppercase" }}>How it works</span>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.green, textTransform: "uppercase" }}>{t("landing.how.label")}</span>
             <h2 className={playfair.className} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 700, color: C.royalDeep, marginTop: 12 }}>
-              From displaced to deployed — in weeks
+              {t("landing.how.title")}
             </h2>
           </div>
 
@@ -286,7 +273,7 @@ export default function LandingPage() {
 
           <div style={{ textAlign: "center", marginTop: 48 }}>
             <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
-              {ctaLoading ? "Loading…" : "Start free →"}
+              {ctaLoading ? t("landing.hero.loading") : t("landing.hero.ctaStart")}
             </button>
           </div>
         </div>
@@ -296,25 +283,25 @@ export default function LandingPage() {
       <section id="testimonials" style={{ padding: "96px 24px", background: C.bg }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.royal, textTransform: "uppercase" }}>Real results</span>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.royal, textTransform: "uppercase" }}>{t("landing.testimonials.label")}</span>
             <h2 className={playfair.className} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 700, color: C.royalDeep, marginTop: 12 }}>
-              Workers who relaunched
+              {t("landing.testimonials.title")}
             </h2>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
-            {TESTIMONIALS.map((t, i) => (
+            {TESTIMONIALS.map((testimonial, i) => (
               <div key={i} className="testimonial-card" style={{
                 background: C.white, borderRadius: 16,
                 border: `1px solid ${C.border}`, padding: "28px 24px",
                 transition: "all 0.2s", display: "flex", flexDirection: "column", gap: 20,
               }}>
                 <div style={{ color: C.gold, fontSize: 28, lineHeight: 1 }}>"</div>
-                <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, flexGrow: 1 }}>{t.quote}</p>
+                <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, flexGrow: 1 }}>{testimonial.quote}</p>
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: C.royalDeep }}>{t.name}</div>
-                  <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginTop: 2 }}>{t.role}</div>
-                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{t.location}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: C.royalDeep }}>{testimonial.name}</div>
+                  <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginTop: 2 }}>{testimonial.role}</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{testimonial.location}</div>
                 </div>
               </div>
             ))}
@@ -325,15 +312,15 @@ export default function LandingPage() {
       {/* ── Founder ─────────────────────────────────────────────────────── */}
       <section style={{ padding: "96px 24px", background: C.royalDeep }}>
         <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.gold, textTransform: "uppercase" }}>Why we built this</span>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", color: C.gold, textTransform: "uppercase" }}>{t("landing.founder.label")}</span>
           <h2 className={playfair.className} style={{ fontSize: "clamp(24px, 3.5vw, 38px)", fontWeight: 700, color: C.white, marginTop: 16, marginBottom: 24, lineHeight: 1.3 }}>
-            I validated 6,500 Reddit users before writing a single line of code
+            {t("landing.founder.title")}
           </h2>
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.75)", lineHeight: 1.8, marginBottom: 20 }}>
-            I spent months reading posts from workers displaced by AI — data entry clerks, paralegals, customer service reps, financial analysts. The pattern was the same everywhere: they had real, valuable skills. They just had no way to surface them in a system built for a different era.
+            {t("landing.founder.p1")}
           </p>
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.75)", lineHeight: 1.8 }}>
-            RelaunchJobs exists to fix that. Not with hustle advice or generic courses — with a real pipeline that translates what you already know into what the market actually needs.
+            {t("landing.founder.p2")}
           </p>
           <div style={{ marginTop: 32, display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
             <div style={{
@@ -343,8 +330,8 @@ export default function LandingPage() {
               fontSize: 20, fontWeight: 700, color: C.white,
             }}>J</div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ fontWeight: 700, color: C.white, fontSize: 15 }}>Jean Alce</div>
-              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Founder, RelaunchJobs</div>
+              <div style={{ fontWeight: 700, color: C.white, fontSize: 15 }}>{t("landing.founder.founderName")}</div>
+              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{t("landing.founder.founderRole")}</div>
             </div>
           </div>
         </div>
@@ -354,16 +341,16 @@ export default function LandingPage() {
       <section style={{ padding: "96px 24px", background: C.white, textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <h2 className={playfair.className} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 700, color: C.royalDeep, lineHeight: 1.2, marginBottom: 16 }}>
-            Your next role already fits your skills.
+            {t("landing.cta.title")}
           </h2>
           <p style={{ fontSize: 16, color: C.muted, marginBottom: 40, lineHeight: 1.6 }}>
-            Stop applying blind. Let the pipeline show you exactly where you stand — and what to do next.
+            {t("landing.cta.sub")}
           </p>
 
           <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
-            {ctaLoading ? "Loading…" : "Start free →"}
+            {ctaLoading ? t("landing.cta.loading") : t("landing.cta.start")}
           </button>
-          <p style={{ fontSize: 12, color: C.muted, marginTop: 16 }}>No credit card required.</p>
+          <p style={{ fontSize: 12, color: C.muted, marginTop: 16 }}>{t("landing.cta.noCard")}</p>
         </div>
       </section>
 
@@ -374,28 +361,28 @@ export default function LandingPage() {
             <div>
               <span className={playfair.className} style={{ fontSize: 22, fontWeight: 700, color: C.white }}>RelaunchJobs</span>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, marginTop: 8, maxWidth: 240, lineHeight: 1.6 }}>
-                AI-powered career transitions for displaced workers.
+                {t("landing.footer.tagline")}
               </p>
             </div>
             <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>Product</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>{t("landing.footer.product")}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <a href="#how-it-works" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>How it works</a>
-                  <Link href="/signup" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>Get started</Link>
-                  <Link href="/login" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>Sign in</Link>
+                  <a href="#how-it-works" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.howItWorks")}</a>
+                  <Link href="/signup" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.getStarted")}</Link>
+                  <Link href="/login" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.signIn")}</Link>
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>Legal</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>{t("landing.footer.legal")}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <Link href="/terms" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>Terms</Link>
-                  <Link href="/privacy" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>Privacy</Link>
-                  <Link href="/contact" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>Contact</Link>
+                  <Link href="/terms" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.terms")}</Link>
+                  <Link href="/privacy" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.privacy")}</Link>
+                  <Link href="/contact" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{t("landing.footer.contact")}</Link>
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>Support</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 12 }}>{t("landing.footer.support")}</div>
                 <a href="mailto:support@relaunchjobs.app" style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>
                   support@relaunchjobs.app
                 </a>
@@ -403,8 +390,8 @@ export default function LandingPage() {
             </div>
           </div>
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>© {new Date().getFullYear()} RelaunchJobs. All rights reserved.</span>
-            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>Built for the displaced — not the lucky.</span>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>© {new Date().getFullYear()} RelaunchJobs. {t("landing.footer.rights")}</span>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{t("landing.footer.tagline2")}</span>
           </div>
         </div>
       </footer>
