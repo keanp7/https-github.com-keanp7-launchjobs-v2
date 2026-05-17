@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { Progress } from "@/components/ui/progress"
 import { LangToggle } from "@/components/landing/LangToggle"
 import { createClient } from "@/lib/supabase/client"
@@ -13,11 +14,20 @@ const STEPS: Record<string, { pct: number; label: string }> = {
   "/profile":  { pct: 100, label: "Profile" },
 }
 
+const ADMIN_EMAIL = "keanphil05@gmail.com"
+
 export function ProgressBar() {
   const pathname = usePathname()
   const router   = useRouter()
   const step     = STEPS[pathname]
   const progress = step?.pct ?? 0
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data: { user } }) => {
+      if (user?.email?.toLowerCase() === ADMIN_EMAIL) setIsAdmin(true)
+    })
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -38,6 +48,14 @@ export function ProgressBar() {
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <LangToggle />
+          {isAdmin && (
+            <a
+              href="/admin"
+              style={{ fontSize: "12px", color: "#2563eb", fontWeight: 500, textDecoration: "none", padding: "4px 8px", border: "1px solid #dbeafe", borderRadius: "6px", background: "#eff6ff" }}
+            >
+              Admin
+            </a>
+          )}
           <button
             onClick={handleSignOut}
             style={{ fontSize: "12px", color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}
