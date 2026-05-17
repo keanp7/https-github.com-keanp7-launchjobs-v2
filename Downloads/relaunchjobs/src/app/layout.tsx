@@ -39,8 +39,22 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {gaId && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+            <script dangerouslySetInnerHTML={{ __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}');
+            ` }} />
+          </>
+        )}
+      </head>
       <body className={`${geist.className} min-h-screen antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LangProvider>

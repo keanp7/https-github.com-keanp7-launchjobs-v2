@@ -88,8 +88,7 @@ const STATS = [
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
-  const [email, setEmail] = useState("")
-  const [submitted, setSubmitted] = useState(false)
+  const [ctaLoading, setCtaLoading] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -97,15 +96,9 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  async function handleWaitlist(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email) return
-    await fetch("/api/waitlist", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, source: "landing_hero" }),
-    })
-    setSubmitted(true)
+  function handleCta() {
+    setCtaLoading(true)
+    window.location.href = "/signup"
   }
 
   return (
@@ -121,11 +114,18 @@ export default function LandingPage() {
         .fade-up-3 { animation: fadeUp 0.6s ease 0.3s forwards; opacity: 0; }
         .btn-primary { background: ${C.gold}; color: white; border: none; border-radius: 10px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; display: inline-block; text-decoration: none; }
         .btn-primary:hover { background: #b8841f; transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         .btn-ghost { background: transparent; color: ${C.royal}; border: 1.5px solid ${C.royal}; border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block; }
         .btn-ghost:hover { background: ${C.royal}; color: white; }
         .pain-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
         .step-card:hover { border-color: ${C.royal}; }
         .testimonial-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+        @media (max-width: 640px) {
+          .hide-mobile { display: none !important; }
+          .grid-mobile-1 { grid-template-columns: 1fr !important; }
+          .stack-mobile { flex-direction: column !important; align-items: stretch !important; }
+          .stack-mobile a, .stack-mobile button { width: 100% !important; text-align: center !important; }
+        }
       `}</style>
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
@@ -188,10 +188,10 @@ export default function LandingPage() {
           </p>
 
           {/* CTA */}
-          <div className="fade-up-3" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
-            <Link href="/signup" className="btn-primary" style={{ fontSize: 16, padding: "16px 36px" }}>
-              Start free — no credit card
-            </Link>
+          <div className="fade-up-3 stack-mobile" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
+            <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 36px" }}>
+              {ctaLoading ? "Loading…" : "Start free →"}
+            </button>
             <a href="#how-it-works" className="btn-ghost" style={{ fontSize: 16, padding: "16px 28px" }}>
               See how it works
             </a>
@@ -285,9 +285,9 @@ export default function LandingPage() {
           </div>
 
           <div style={{ textAlign: "center", marginTop: 48 }}>
-            <Link href="/signup" className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
-              Start your relaunch →
-            </Link>
+            <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
+              {ctaLoading ? "Loading…" : "Start free →"}
+            </button>
           </div>
         </div>
       </section>
@@ -360,39 +360,10 @@ export default function LandingPage() {
             Stop applying blind. Let the pipeline show you exactly where you stand — and what to do next.
           </p>
 
-          {submitted ? (
-            <div style={{ padding: "20px 32px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, color: C.green, fontWeight: 600, fontSize: 15 }}>
-              ✓ You're on the list — we'll be in touch soon.
-            </div>
-          ) : (
-            <form onSubmit={handleWaitlist} style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                style={{
-                  padding: "14px 18px", borderRadius: 10, border: `1.5px solid ${C.border}`,
-                  fontSize: 15, outline: "none", width: "100%", maxWidth: 320,
-                  transition: "border-color 0.15s",
-                }}
-                onFocus={e => (e.currentTarget.style.borderColor = C.royal)}
-                onBlur={e => (e.currentTarget.style.borderColor = C.border)}
-              />
-              <button type="submit" className="btn-primary" style={{ fontSize: 15, padding: "14px 28px" }}>
-                Join waitlist
-              </button>
-            </form>
-          )}
-
-          <p style={{ fontSize: 12, color: C.muted, marginTop: 16 }}>
-            Or{" "}
-            <Link href="/signup" style={{ color: C.royal, fontWeight: 600, textDecoration: "none" }}>
-              create a free account now
-            </Link>{" "}
-            and start today.
-          </p>
+          <button onClick={handleCta} disabled={ctaLoading} className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
+            {ctaLoading ? "Loading…" : "Start free →"}
+          </button>
+          <p style={{ fontSize: 12, color: C.muted, marginTop: 16 }}>No credit card required.</p>
         </div>
       </section>
 

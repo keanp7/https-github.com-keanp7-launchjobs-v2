@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import Link from "next/link"
+import { AdminNav } from "./AdminNav"
 
 function isAdmin(email: string | undefined): boolean {
   if (!email) return false
@@ -35,17 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             RelaunchJobs
           </span>
           <div style={{ width: "1px", height: "18px", background: "#e5e7eb" }} />
-          <nav style={{ display: "flex", gap: "2px" }}>
-            <Link href="/admin" style={{ fontSize: "13px", fontWeight: 500, color: "#374151", padding: "5px 10px", borderRadius: "6px", textDecoration: "none" }}>
-              Dashboard
-            </Link>
-            <Link href="/admin/waitlist" style={{ fontSize: "13px", fontWeight: 500, color: "#374151", padding: "5px 10px", borderRadius: "6px", textDecoration: "none" }}>
-              Waitlist
-            </Link>
-            <Link href="/admin/testimonials" style={{ fontSize: "13px", fontWeight: 500, color: "#374151", padding: "5px 10px", borderRadius: "6px", textDecoration: "none" }}>
-              Testimonials
-            </Link>
-          </nav>
+          <AdminNav />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <span style={{ fontSize: "12px", color: "#9ca3af" }}>{user.email}</span>

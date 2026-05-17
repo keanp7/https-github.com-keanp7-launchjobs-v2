@@ -66,10 +66,10 @@ export default async function AdminPage() {
 
       {/* Stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "24px" }}>
-        <StatCard label="Total Users" value={totalCandidates ?? 0} delta={null} />
+        <StatCard label="Total Users" value={totalCandidates ?? 0} delta={null} accent="#2563eb" />
         <StatCard label="Waitlist" value={waitlistCount ?? 0} delta={null} accent="#2563eb" />
-        <StatCard label="Analyses Run" value={analysesCount ?? 0} delta={null} accent="#7c3aed" />
-        <StatCard label="Profiles Built" value={profilesCount ?? 0} delta={null} accent="#059669" />
+        <StatCard label="Analyses Run" value={analysesCount ?? 0} delta={null} accent="#2563eb" />
+        <StatCard label="Profiles Built" value={profilesCount ?? 0} delta={null} accent="#2563eb" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
