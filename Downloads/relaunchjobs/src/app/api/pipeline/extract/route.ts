@@ -22,21 +22,28 @@ export async function POST(request: NextRequest) {
       extra_context: intake_data.context || "",
     }
 
+    const userPrompt = PROMPTS.EXTRACT_SKILLS.buildUser(normalized)
+    console.log("[extract] candidate_id:", candidate_id)
+    console.log("[extract] normalized intake:", JSON.stringify(normalized))
+    console.log("[extract] prompt sent to Claude:", userPrompt)
+
     const response = await getAnthropicClient().messages.create({
       model: MODEL,
       max_tokens: 1500,
       system: PROMPTS.EXTRACT_SKILLS.system,
       messages: [{
         role: "user",
-        content: PROMPTS.EXTRACT_SKILLS.buildUser(normalized),
+        content: userPrompt,
       }],
     })
 
     const raw = response.content[0].type === "text" ? response.content[0].text : ""
+    console.log("[extract] raw Claude response:", raw)
     const clean = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
     let parsed: any
     try {
       parsed = JSON.parse(clean)
+      console.log("[extract] parsed skills — hard:", parsed.hard_skills?.length, "soft:", parsed.soft_skills?.length, "domain:", parsed.domain_knowledge?.length, "hidden:", parsed.hidden_strengths?.length)
     } catch {
       throw new Error(`AI returned invalid JSON: ${clean.substring(0, 200)}`)
     }

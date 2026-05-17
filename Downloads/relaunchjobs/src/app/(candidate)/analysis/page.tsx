@@ -9,7 +9,10 @@ export default function AnalysisPage() {
   const router = useRouter()
   const { t } = useLang()
   const [loading, setLoading] = useState(true)
+  const [retrying, setRetrying] = useState(false)
   const [analysis, setAnalysis] = useState<any>(null)
+  const [onboardingComplete, setOnboardingComplete] = useState(false)
+  const [candidateId, setCandidateId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -20,11 +23,13 @@ export default function AnalysisPage() {
 
         const { data: candidate } = await supabase
           .from('candidates')
-          .select('id')
+          .select('id, onboarding_completed, old_job_title, industry, displacement_reason, extra_context, years_experience')
           .eq('id', user.id)
           .single()
 
         if (!candidate) { setLoading(false); return }
+        setCandidateId(candidate.id)
+        setOnboardingComplete(!!candidate.onboarding_completed)
 
         const { data: analysis, error } = await supabase
           .from('skills_analyses')
@@ -45,6 +50,45 @@ export default function AnalysisPage() {
     fetchAnalysis()
   }, [])
 
+  const retryPipeline = async () => {
+    if (!candidateId) return
+    setRetrying(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: candidate } = await supabase
+        .from('candidates')
+        .select('old_job_title, years_experience, industry, displacement_reason, extra_context')
+        .eq('id', user.id)
+        .single()
+
+      const intakeData = {
+        jobTitle: candidate?.old_job_title ?? '',
+        yearsExp: String(candidate?.years_experience ?? 1),
+        industry: candidate?.industry ?? '',
+        reason: candidate?.displacement_reason ?? '',
+        context: candidate?.extra_context ?? '',
+      }
+
+      await fetch('/api/pipeline/extract', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidateId, intake_data: intakeData }),
+      })
+      await fetch('/api/pipeline/risk', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidateId, intake_data: intakeData }),
+      })
+
+      // Reload the page to show fresh data
+      window.location.reload()
+    } catch (err) {
+      console.error('Retry failed:', err)
+      setRetrying(false)
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
@@ -56,6 +100,23 @@ export default function AnalysisPage() {
   }
 
   if (!analysis) {
+    // If onboarding is marked complete but data is missing, retry the pipeline
+    // instead of sending back to /intake (which would cause a redirect loop)
+    if (onboardingComplete) {
+      return (
+        <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px', textAlign: 'center' }}>
+          <p style={{ color: '#6b7280', fontSize: '16px' }}>Your analysis is missing — this can happen if the AI step timed out.</p>
+          <button
+            onClick={retryPipeline}
+            disabled={retrying}
+            style={{ padding: '12px 28px', background: '#1a3a6b', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: 600, cursor: retrying ? 'not-allowed' : 'pointer', opacity: retrying ? 0.7 : 1 }}
+          >
+            {retrying ? 'Re-running analysis…' : 'Retry analysis'}
+          </button>
+        </div>
+      )
+    }
+
     return (
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
         <p style={{ color: '#6b7280', fontSize: '16px', textAlign: 'center' }}>{t('analysis.noData')}</p>

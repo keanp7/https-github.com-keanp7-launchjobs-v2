@@ -190,6 +190,17 @@ function IntakeForm() {
         console.warn('[intake] Gap analysis failed (non-fatal):', e.details)
       }
 
+      // Pre-generate candidate profile so /profile page loads instantly
+      const profileRes = await fetch('/api/pipeline/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidate.id }),
+      })
+      if (!profileRes.ok) {
+        const e = await profileRes.json()
+        console.warn('[intake] Profile generation failed (non-fatal):', e.details)
+      }
+
       // Mark onboarding complete → next visit skips intake entirely
       await supabase
         .from('candidates')
