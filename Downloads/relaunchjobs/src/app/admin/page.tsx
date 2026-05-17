@@ -66,10 +66,10 @@ export default async function AdminPage() {
 
       {/* Stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "24px" }}>
-        <StatCard label="Total Users" value={totalCandidates ?? 0} delta={null} accent="#2563eb" />
-        <StatCard label="Waitlist" value={waitlistCount ?? 0} delta={null} accent="#2563eb" />
-        <StatCard label="Analyses Run" value={analysesCount ?? 0} delta={null} accent="#2563eb" />
-        <StatCard label="Profiles Built" value={profilesCount ?? 0} delta={null} accent="#2563eb" />
+        <StatCard label="Total Users" value={totalCandidates ?? 0} accent="#2563eb" bg="#eff6ff" />
+        <StatCard label="Waitlist" value={waitlistCount ?? 0} accent="#7c3aed" bg="#f5f3ff" />
+        <StatCard label="Analyses Run" value={analysesCount ?? 0} accent="#059669" bg="#ecfdf5" />
+        <StatCard label="Profiles Built" value={profilesCount ?? 0} accent="#d97706" bg="#fffbeb" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
@@ -171,16 +171,22 @@ export default async function AdminPage() {
   )
 }
 
-function StatCard({ label, value, delta, accent = "#111827" }: {
+function StatCard({ label, value, accent = "#2563eb", bg = "#eff6ff" }: {
   label: string
   value: number
-  delta: number | null
   accent?: string
+  bg?: string
 }) {
   return (
-    <div style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "20px" }}>
-      <p style={{ fontSize: "12px", color: "#6b7280", fontWeight: 500, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</p>
-      <p style={{ fontSize: "28px", fontWeight: 700, color: accent, margin: 0, letterSpacing: "-1px", fontVariantNumeric: "tabular-nums" }}>
+    <div style={{
+      background: bg,
+      border: `1px solid ${accent}22`,
+      borderLeft: `4px solid ${accent}`,
+      borderRadius: "8px",
+      padding: "20px 20px 20px 18px",
+    }}>
+      <p style={{ fontSize: "12px", color: accent, fontWeight: 600, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.6px" }}>{label}</p>
+      <p style={{ fontSize: "32px", fontWeight: 800, color: accent, margin: 0, letterSpacing: "-1.5px", fontVariantNumeric: "tabular-nums" }}>
         {value.toLocaleString()}
       </p>
     </div>
