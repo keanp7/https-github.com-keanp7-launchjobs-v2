@@ -2,6 +2,7 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  serverExternalPackages: ["@react-pdf/renderer"],
   async redirects() {
     return [
       // Defensive redirects — these routes don't exist but redirect cleanly
