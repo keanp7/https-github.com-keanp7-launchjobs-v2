@@ -1,45 +1,28 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import type { ResumeData } from "./ResumeDocument"
 
-// ── Dynamic import keeps @react-pdf/renderer off the server bundle ────────────
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
-  { ssr: false }
-)
-
-// Lazy-load the PDF document itself for the same reason
-const ResumeDocumentLazy = dynamic(
-  () => import("./ResumeDocument").then((m) => m.ResumeDocument),
-  { ssr: false }
-)
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 interface FormState {
   full_name: string
   phone: string
   city_state: string
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export function ResumeBuilder() {
   const [candidateId, setCandidateId] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string>("")
   const [form, setForm] = useState<FormState>({ full_name: "", phone: "", city_state: "" })
   const [resumeData, setResumeData] = useState<ResumeData | null>(null)
   const [generating, setGenerating] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const [loadingProfile, setLoadingProfile] = useState(true)
-  const [isMounted, setIsMounted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // PDF download link needs the browser — gate it behind mount
-  useEffect(() => { setIsMounted(true) }, [])
-
-  // ── Load user + pre-fill from existing profile ────────────────────────────
+  // ── Load user ─────────────────────────────────────────────────────────────
   useEffect(() => {
     async function load() {
       try {
@@ -59,7 +42,6 @@ export function ResumeBuilder() {
 
         setCandidateId(candidate.id)
 
-        // Pre-fill name from auth metadata if available
         const displayName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? ""
         if (displayName) setForm((f) => ({ ...f, full_name: displayName }))
       } catch (err: any) {
@@ -71,7 +53,7 @@ export function ResumeBuilder() {
     load()
   }, [])
 
-  // ── Generate ──────────────────────────────────────────────────────────────
+  // ── Step 1: Claude formats bullets ───────────────────────────────────────
   async function handleGenerate() {
     if (!candidateId) return
     if (!form.full_name.trim()) { toast.error("Please enter your full name."); return }
@@ -96,6 +78,37 @@ export function ResumeBuilder() {
       toast.error("Could not generate resume.")
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // ── Step 2: Server generates PDF, client downloads blob ──────────────────
+  async function handleDownload() {
+    if (!resumeData) return
+    setDownloading(true)
+    try {
+      const res = await fetch("/api/pipeline/resume/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resumeData),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        throw new Error(json?.error ?? "PDF generation failed.")
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${resumeData.full_name.replace(/[^a-z0-9]/gi, "_")}_Resume.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err: any) {
+      console.error("[ResumeBuilder download]", err?.message)
+      toast.error("Could not generate PDF.")
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -145,7 +158,6 @@ export function ResumeBuilder() {
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          {/* Email — read only */}
           <div>
             <label style={labelStyle}>Email</label>
             <input
@@ -156,7 +168,6 @@ export function ResumeBuilder() {
             />
           </div>
 
-          {/* Full name */}
           <div>
             <label style={labelStyle}>
               Full name <span style={{ color: "#ef4444" }}>*</span>
@@ -170,7 +181,6 @@ export function ResumeBuilder() {
             />
           </div>
 
-          {/* Phone */}
           <div>
             <label style={labelStyle}>Phone</label>
             <input
@@ -182,7 +192,6 @@ export function ResumeBuilder() {
             />
           </div>
 
-          {/* City / State */}
           <div>
             <label style={labelStyle}>City / State</label>
             <input
@@ -195,7 +204,6 @@ export function ResumeBuilder() {
           </div>
         </div>
 
-        {/* Generate button */}
         <button
           onClick={handleGenerate}
           disabled={generating || !candidateId}
@@ -235,7 +243,7 @@ export function ResumeBuilder() {
         )}
       </div>
 
-      {/* ── Download card (shown after generation) ──────────────────────── */}
+      {/* ── Download card ────────────────────────────────────────────────── */}
       {resumeData && (
         <div style={{
           background: "white",
@@ -257,10 +265,10 @@ export function ResumeBuilder() {
           </div>
 
           <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "18px" }}>
-            Your resume has been formatted using your skills profile. Click below to download the PDF.
+            Your resume has been formatted. Click below to generate and download the PDF.
           </p>
 
-          {/* Preview summary */}
+          {/* Preview */}
           <div style={{
             background: "#f8fafc",
             borderRadius: "8px",
@@ -294,42 +302,37 @@ export function ResumeBuilder() {
             </div>
           </div>
 
-          {/* PDF download link — client-only */}
-          {isMounted ? (
-            <PDFDownloadLink
-              document={<ResumeDocumentLazy data={resumeData} />}
-              fileName={`${resumeData.full_name.replace(/\s+/g, "_")}_Resume.pdf`}
-              style={{ textDecoration: "none", display: "block" }}
-            >
-              {({ loading: pdfLoading }) => (
-                <button
-                  style={{
-                    width: "100%",
-                    padding: "13px",
-                    background: pdfLoading ? "#93c5fd" : "#2563EB",
-                    color: "white",
-                    borderRadius: "8px",
-                    border: "none",
-                    cursor: pdfLoading ? "wait" : "pointer",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                  }}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            style={{
+              width: "100%",
+              padding: "13px",
+              background: downloading ? "#93c5fd" : "#2563EB",
+              color: "white",
+              borderRadius: "8px",
+              border: "none",
+              cursor: downloading ? "not-allowed" : "pointer",
+              fontSize: "15px",
+              fontWeight: 700,
+            }}
+          >
+            {downloading ? (
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <svg
+                  width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                  style={{ animation: "spin 0.75s linear infinite" }}
                 >
-                  {pdfLoading ? "Preparing PDF…" : "↓ Download PDF Resume"}
-                </button>
-              )}
-            </PDFDownloadLink>
-          ) : (
-            <div style={{
-              width: "100%", padding: "13px", background: "#e2e8f0",
-              borderRadius: "8px", textAlign: "center", fontSize: "14px", color: "#64748b",
-            }}>
-              Preparing download…
-            </div>
-          )}
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Generating PDF…
+              </span>
+            ) : "↓ Download PDF Resume"}
+          </button>
 
           <button
-            onClick={() => { setResumeData(null); setGenerating(false) }}
+            onClick={() => { setResumeData(null) }}
             style={{
               marginTop: "10px",
               width: "100%",
@@ -350,7 +353,6 @@ export function ResumeBuilder() {
   )
 }
 
-// ── Shared inline styles ──────────────────────────────────────────────────────
 const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "13px",
