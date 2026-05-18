@@ -7,11 +7,12 @@ import { LangToggle } from "@/components/landing/LangToggle"
 import { createClient } from "@/lib/supabase/client"
 
 const STEPS: Record<string, { pct: number; label: string }> = {
-  "/intake":   { pct: 20,  label: "Intake" },
-  "/analysis": { pct: 40,  label: "Analysis" },
-  "/roles":    { pct: 60,  label: "Roles" },
-  "/learning": { pct: 80,  label: "Learning" },
-  "/profile":  { pct: 100, label: "Profile" },
+  "/intake":   { pct: 17,  label: "Intake" },
+  "/analysis": { pct: 34,  label: "Analysis" },
+  "/roles":    { pct: 50,  label: "Roles" },
+  "/learning": { pct: 67,  label: "Learning" },
+  "/profile":  { pct: 84,  label: "Profile" },
+  "/resume":   { pct: 100, label: "Resume" },
 }
 
 const ADMIN_EMAIL = "keanphil05@gmail.com"

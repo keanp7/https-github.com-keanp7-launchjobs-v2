@@ -205,6 +205,24 @@ export function ProfileCard() {
       <Button className="w-full" variant="outline" onClick={copyAll}>
         Copy full profile
       </Button>
+
+      <button
+        onClick={() => router.push("/resume")}
+        style={{
+          width: "100%",
+          padding: "13px",
+          background: "#2563EB",
+          color: "white",
+          borderRadius: "8px",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "15px",
+          fontWeight: 700,
+          letterSpacing: "0.01em",
+        }}
+      >
+        Generate PDF Resume →
+      </button>
     </div>
   )
 }
