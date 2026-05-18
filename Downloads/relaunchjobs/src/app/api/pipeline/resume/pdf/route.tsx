@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await renderToBuffer(<ResumeDocument data={data} />)
     const filename = `${data.full_name.replace(/[^a-z0-9]/gi, "_")}_Resume.pdf`
 
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
